@@ -33,32 +33,35 @@ public class AuthController : ControllerBase
     /// <response code="200">Returns the authenticated user info and token</response>
     /// <response code="400">If the data is invalid or email already exists</response>
     [HttpPost("register")]
-    public async Task<ActionResult> Register([FromBody] System.Text.Json.JsonElement data)
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto dto)
     {
-        _logger.LogInformation("Register request received: {Json}", data.GetRawText());
+        _logger.LogInformation("Register request received for email: {Email}", dto.Email);
         
         try 
         {
-            string? name = null;
-            string? email = null;
-            string? password = null;
-            int role = 0;
-
-            if (data.TryGetProperty("name", out var n)) name = n.GetString();
-            if (data.TryGetProperty("email", out var e)) email = e.GetString();
-            if (data.TryGetProperty("password", out var p)) password = p.GetString();
-            if (data.TryGetProperty("role", out var r)) 
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(dto.Name))
             {
-                if (r.ValueKind == System.Text.Json.JsonValueKind.Number) role = r.GetInt32();
-                else if (r.ValueKind == System.Text.Json.JsonValueKind.String && int.TryParse(r.GetString(), out var ri)) role = ri;
+                return BadRequest(new { message = "Name is required" });
             }
 
-            if (string.IsNullOrEmpty(email)) return BadRequest(new { message = "Email is required" });
+            if (string.IsNullOrWhiteSpace(dto.Email))
+            {
+                return BadRequest(new { message = "Email is required" });
+            }
 
-            _logger.LogInformation("Processing registration for: {Email}, Name: {Name}, Role: {Role}", email, name, role);
+            if (string.IsNullOrWhiteSpace(dto.Password))
+            {
+                return BadRequest(new { message = "Password is required" });
+            }
+
+            _logger.LogInformation("Processing registration for: {Email}, Name: {Name}, Role: {Role}", 
+                dto.Email, dto.Name, dto.Role ?? 0);
 
             // Check if user already exists
-            if (await _context.Users.AnyAsync(u => u.Email == email.ToLowerInvariant()))
+            if (await _context.Users.AnyAsync(u => u.Email == dto.Email.ToLowerInvariant()))
             {
                 return BadRequest(new { message = "User already exists" });
             }
@@ -66,10 +69,10 @@ public class AuthController : ControllerBase
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                Name = name ?? "User",
-                Email = email.ToLowerInvariant(),
-                Password = password ?? "Password123",
-                Role = (UserRole)role,
+                Name = dto.Name,
+                Email = dto.Email.ToLowerInvariant(),
+                Password = dto.Password,
+                Role = (UserRole)(dto.Role ?? 0),
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -79,12 +82,13 @@ public class AuthController : ControllerBase
             var token = GeneratePlaceholderToken(user);
             var response = AuthResponseDto.FromUser(user, token);
             
+            _logger.LogInformation("User registered successfully: {UserId}", user.Id);
             return Ok(response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Registration error");
-            return StatusCode(500, new { message = ex.Message, detail = ex.ToString() });
+            return StatusCode(500, new { message = "An error occurred during registration", detail = ex.Message });
         }
     }
 

@@ -29,3 +29,4 @@ D:\hoc tap\MedicineProject\backend\ApiGateway\obj\Debug\net9.0\refint\ApiGateway
 D:\hoc tap\MedicineProject\backend\ApiGateway\obj\Debug\net9.0\ApiGateway.pdb
 D:\hoc tap\MedicineProject\backend\ApiGateway\obj\Debug\net9.0\ApiGateway.genruntimeconfig.cache
 D:\hoc tap\MedicineProject\backend\ApiGateway\obj\Debug\net9.0\ref\ApiGateway.dll
+D:\hoc tap\MedicineProject\backend\ApiGateway\obj\Debug\net9.0\ApiGateway.sourcelink.json

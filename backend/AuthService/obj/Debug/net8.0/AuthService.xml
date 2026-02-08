@@ -10,7 +10,7 @@
             This is a simplified demo implementation for academic purposes.
             </summary>
         </member>
-        <member name="M:AuthService.Controllers.AuthController.Register(System.Text.Json.JsonElement)">
+        <member name="M:AuthService.Controllers.AuthController.Register(AuthService.Models.DTOs.RegisterDto)">
             <summary>
             Register a new user
             </summary>
