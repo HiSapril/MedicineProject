@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AppointmentService</name>
+    </assembly>
+    <members>
+        <member name="T:AppointmentService.Controllers.AppointmentsController">
+            <summary>
+            RESTful API controller for managing appointments.
+            This is a minimal implementation with in-memory storage for demonstration purposes.
+            </summary>
+        </member>
+        <member name="M:AppointmentService.Controllers.AppointmentsController.GetAll">
+            <summary>
+            Get all appointments
+            </summary>
+            <returns>List of all appointments</returns>
+            <response code="200">Returns the list of appointments</response>
+        </member>
+        <member name="M:AppointmentService.Controllers.AppointmentsController.GetById(System.Guid)">
+            <summary>
+            Get a specific appointment by ID
+            </summary>
+            <param name="id">The appointment ID</param>
+            <returns>The appointment if found</returns>
+            <response code="200">Returns the appointment</response>
+            <response code="404">If the appointment is not found</response>
+        </member>
+        <member name="M:AppointmentService.Controllers.AppointmentsController.Create(AppointmentService.Models.DTOs.CreateAppointmentDto)">
+            <summary>
+            Create a new appointment
+            </summary>
+            <param name="dto">The appointment data</param>
+            <returns>The created appointment</returns>
+            <response code="201">Returns the newly created appointment</response>
+            <response code="400">If the data is invalid</response>
+        </member>
+        <member name="M:AppointmentService.Controllers.AppointmentsController.Update(System.Guid,AppointmentService.Models.DTOs.UpdateAppointmentDto)">
+            <summary>
+            Update an existing appointment
+            </summary>
+            <param name="id">The appointment ID</param>
+            <param name="dto">The updated appointment data</param>
+            <returns>The updated appointment</returns>
+            <response code="200">Returns the updated appointment</response>
+            <response code="404">If the appointment is not found</response>
+            <response code="400">If the data is invalid</response>
+        </member>
+        <member name="M:AppointmentService.Controllers.AppointmentsController.Delete(System.Guid)">
+            <summary>
+            Delete an appointment
+            </summary>
+            <param name="id">The appointment ID</param>
+            <returns>No content</returns>
+            <response code="204">If the appointment was successfully deleted</response>
+            <response code="404">If the appointment is not found</response>
+        </member>
+        <member name="T:AppointmentService.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:AppointmentService.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AppointmentService.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AppointmentService.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:AppointmentService.Models.Appointment">
+            <summary>
+            Represents a medical appointment in the system.
+            This is a first-class domain entity as per architecture rules.
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.Appointment.Id">
+            <summary>
+            Unique identifier for the appointment
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.Appointment.UserId">
+            <summary>
+            ID of the user (elderly person) who has this appointment
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.Appointment.DoctorName">
+            <summary>
+            Name of the doctor for this appointment
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.Appointment.Location">
+            <summary>
+            Location where the appointment will take place
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.Appointment.AppointmentDate">
+            <summary>
+            Date and time of the appointment
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.Appointment.Notes">
+            <summary>
+            Additional notes or instructions for the appointment
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.Appointment.CreatedAt">
+            <summary>
+            Timestamp when the appointment was created
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.Appointment.UpdatedAt">
+            <summary>
+            Timestamp when the appointment was last updated
+            </summary>
+        </member>
+        <member name="T:AppointmentService.Models.DTOs.AppointmentResponseDto">
+            <summary>
+            Data Transfer Object for appointment responses
+            </summary>
+        </member>
+        <member name="M:AppointmentService.Models.DTOs.AppointmentResponseDto.FromEntity(AppointmentService.Models.Appointment)">
+            <summary>
+            Maps an Appointment entity to a response DTO
+            </summary>
+        </member>
+        <member name="T:AppointmentService.Models.DTOs.CreateAppointmentDto">
+            <summary>
+            Data Transfer Object for creating a new appointment
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.DTOs.CreateAppointmentDto.UserId">
+            <summary>
+            ID of the user who will have this appointment
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.DTOs.CreateAppointmentDto.DoctorName">
+            <summary>
+            Name of the doctor
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.DTOs.CreateAppointmentDto.Location">
+            <summary>
+            Location of the appointment
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.DTOs.CreateAppointmentDto.AppointmentDate">
+            <summary>
+            Date and time of the appointment
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.DTOs.CreateAppointmentDto.Notes">
+            <summary>
+            Optional notes for the appointment
+            </summary>
+        </member>
+        <member name="T:AppointmentService.Models.DTOs.UpdateAppointmentDto">
+            <summary>
+            Data Transfer Object for updating an existing appointment.
+            All fields are optional to support partial updates.
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.DTOs.UpdateAppointmentDto.DoctorName">
+            <summary>
+            Updated doctor name
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.DTOs.UpdateAppointmentDto.Location">
+            <summary>
+            Updated location
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.DTOs.UpdateAppointmentDto.AppointmentDate">
+            <summary>
+            Updated appointment date and time
+            </summary>
+        </member>
+        <member name="P:AppointmentService.Models.DTOs.UpdateAppointmentDto.Notes">
+            <summary>
+            Updated notes
+            </summary>
+        </member>
+    </members>
+</doc>

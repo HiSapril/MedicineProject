@@ -1,0 +1,185 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AuthService</name>
+    </assembly>
+    <members>
+        <member name="T:AuthService.Controllers.AuthController">
+            <summary>
+            API controller for user authentication and identity management.
+            This is a simplified demo implementation for academic purposes.
+            </summary>
+        </member>
+        <member name="M:AuthService.Controllers.AuthController.Register(AuthService.Models.DTOs.RegisterDto)">
+            <summary>
+            Register a new user
+            </summary>
+            <param name="dto">Registration data</param>
+            <returns>Authentication response with user info and token</returns>
+            <response code="200">Returns the authenticated user info and token</response>
+            <response code="400">If the data is invalid or email already exists</response>
+        </member>
+        <member name="M:AuthService.Controllers.AuthController.Login(AuthService.Models.DTOs.LoginDto)">
+            <summary>
+            Login with email and password
+            </summary>
+            <param name="dto">Login credentials</param>
+            <returns>Authentication response with user info and token</returns>
+            <response code="200">Returns the authenticated user info and token</response>
+            <response code="401">If credentials are invalid</response>
+        </member>
+        <member name="M:AuthService.Controllers.AuthController.GetCurrentUser(System.String)">
+            <summary>
+            Get current user information (simulated - requires token validation in production)
+            </summary>
+            <param name="token">Authorization token from header</param>
+            <returns>User information</returns>
+            <response code="200">Returns the user information</response>
+            <response code="401">If token is invalid or missing</response>
+        </member>
+        <member name="M:AuthService.Controllers.AuthController.GeneratePlaceholderToken(AuthService.Models.User)">
+            <summary>
+            Generates a placeholder token for demo purposes.
+            In production, this should generate a proper JWT token.
+            </summary>
+        </member>
+        <member name="T:AuthService.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthService.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:AuthService.Models.DTOs.AuthResponseDto">
+            <summary>
+            Data Transfer Object for authentication response
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.AuthResponseDto.UserId">
+            <summary>
+            User ID
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.AuthResponseDto.Name">
+            <summary>
+            User's full name
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.AuthResponseDto.Email">
+            <summary>
+            User's email
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.AuthResponseDto.Role">
+            <summary>
+            User's role
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.AuthResponseDto.Token">
+            <summary>
+            Authentication token (placeholder for demo - will be JWT in production)
+            </summary>
+        </member>
+        <member name="M:AuthService.Models.DTOs.AuthResponseDto.FromUser(AuthService.Models.User,System.String)">
+            <summary>
+            Creates a response DTO from a User entity
+            </summary>
+        </member>
+        <member name="T:AuthService.Models.DTOs.LoginDto">
+            <summary>
+            Data Transfer Object for user login
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.LoginDto.Email">
+            <summary>
+            Email address
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.LoginDto.Password">
+            <summary>
+            Password
+            </summary>
+        </member>
+        <member name="T:AuthService.Models.DTOs.RegisterDto">
+            <summary>
+            Data Transfer Object for user registration
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.RegisterDto.Name">
+            <summary>
+            Full name of the user
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.RegisterDto.Email">
+            <summary>
+            Email address (used as username)
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.RegisterDto.Password">
+            <summary>
+            Password (plain text for demo - real system needs hashing)
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.DTOs.RegisterDto.Role">
+            <summary>
+            User role (0 = Elderly, 1 = Caregiver)
+            </summary>
+        </member>
+        <member name="T:AuthService.Models.UserRole">
+            <summary>
+            User roles in the system
+            </summary>
+        </member>
+        <member name="F:AuthService.Models.UserRole.Elderly">
+            <summary>
+            Elderly person receiving care
+            </summary>
+        </member>
+        <member name="F:AuthService.Models.UserRole.Caregiver">
+            <summary>
+            Caregiver managing elderly person's care
+            </summary>
+        </member>
+        <member name="T:AuthService.Models.User">
+            <summary>
+            Represents a user in the authentication system.
+            This is a simplified domain entity for academic demo purposes.
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.Id">
+            <summary>
+            Unique identifier for the user
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.Name">
+            <summary>
+            Full name of the user
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.Email">
+            <summary>
+            Email address (used as username)
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.Password">
+            <summary>
+            Password (stored as plain text for demo only - NOT for production)
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.Role">
+            <summary>
+            User's role in the system
+            </summary>
+        </member>
+        <member name="P:AuthService.Models.User.CreatedAt">
+            <summary>
+            Timestamp when the user account was created
+            </summary>
+        </member>
+    </members>
+</doc>

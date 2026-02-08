@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "Jg6lk0i/lEY=",
+  "success": true,
+  "projectFilePath": "D:\\hoc tap\\MedicineProject\\backend\\ApiGateway\\ApiGateway.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Acer\\.nuget\\packages\\system.io.hashing\\8.0.0\\system.io.hashing.8.0.0.nupkg.sha512",
+    "C:\\Users\\Acer\\.nuget\\packages\\yarp.reverseproxy\\2.3.0\\yarp.reverseproxy.2.3.0.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HealthTrackingService</name>
+    </assembly>
+    <members>
+        <member name="T:HealthTrackingService.Controllers.HealthLogsController">
+            <summary>
+            RESTful API controller for managing health logs.
+            This is a minimal implementation with in-memory storage for demonstration purposes.
+            </summary>
+        </member>
+        <member name="M:HealthTrackingService.Controllers.HealthLogsController.GetAll">
+            <summary>
+            Get all health logs
+            </summary>
+            <returns>List of all health logs</returns>
+            <response code="200">Returns the list of health logs</response>
+        </member>
+        <member name="M:HealthTrackingService.Controllers.HealthLogsController.GetById(System.Guid)">
+            <summary>
+            Get a specific health log by ID
+            </summary>
+            <param name="id">The health log ID</param>
+            <returns>The health log if found</returns>
+            <response code="200">Returns the health log</response>
+            <response code="404">If the health log is not found</response>
+        </member>
+        <member name="M:HealthTrackingService.Controllers.HealthLogsController.Create(HealthTrackingService.Models.DTOs.CreateHealthLogDto)">
+            <summary>
+            Create a new health log entry
+            </summary>
+            <param name="dto">The health log data</param>
+            <returns>The created health log</returns>
+            <response code="201">Returns the newly created health log</response>
+            <response code="400">If the data is invalid</response>
+        </member>
+        <member name="M:HealthTrackingService.Controllers.HealthLogsController.Update(System.Guid,HealthTrackingService.Models.DTOs.UpdateHealthLogDto)">
+            <summary>
+            Update an existing health log
+            </summary>
+            <param name="id">The health log ID</param>
+            <param name="dto">The updated health log data</param>
+            <returns>The updated health log</returns>
+            <response code="200">Returns the updated health log</response>
+            <response code="404">If the health log is not found</response>
+            <response code="400">If the data is invalid</response>
+        </member>
+        <member name="M:HealthTrackingService.Controllers.HealthLogsController.Delete(System.Guid)">
+            <summary>
+            Delete a health log
+            </summary>
+            <param name="id">The health log ID</param>
+            <returns>No content</returns>
+            <response code="204">If the health log was successfully deleted</response>
+            <response code="404">If the health log is not found</response>
+        </member>
+        <member name="T:HealthTrackingService.Models.DTOs.CreateHealthLogDto">
+            <summary>
+            Data Transfer Object for creating a new health log entry
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.CreateHealthLogDto.UserId">
+            <summary>
+            ID of the user for this health log
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.CreateHealthLogDto.Date">
+            <summary>
+            Date of the health measurements
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.CreateHealthLogDto.BloodPressure">
+            <summary>
+            Blood pressure reading (e.g., "120/80")
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.CreateHealthLogDto.HeartRate">
+            <summary>
+            Heart rate in beats per minute (optional)
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.CreateHealthLogDto.Note">
+            <summary>
+            Optional note about health status
+            </summary>
+        </member>
+        <member name="T:HealthTrackingService.Models.DTOs.HealthLogResponseDto">
+            <summary>
+            Data Transfer Object for health log responses
+            </summary>
+        </member>
+        <member name="M:HealthTrackingService.Models.DTOs.HealthLogResponseDto.FromEntity(HealthTrackingService.Models.HealthLog)">
+            <summary>
+            Maps a HealthLog entity to a response DTO
+            </summary>
+        </member>
+        <member name="T:HealthTrackingService.Models.DTOs.UpdateHealthLogDto">
+            <summary>
+            Data Transfer Object for updating an existing health log.
+            All fields are optional to support partial updates.
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.UpdateHealthLogDto.Date">
+            <summary>
+            Updated date
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.UpdateHealthLogDto.BloodPressure">
+            <summary>
+            Updated blood pressure reading
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.UpdateHealthLogDto.HeartRate">
+            <summary>
+            Updated heart rate
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.UpdateHealthLogDto.Note">
+            <summary>
+            Updated note
+            </summary>
+        </member>
+        <member name="T:HealthTrackingService.Models.HealthLog">
+            <summary>
+            Represents a basic health log entry in the system.
+            This is a simple domain entity for storing health measurements.
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.HealthLog.Id">
+            <summary>
+            Unique identifier for the health log
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.HealthLog.UserId">
+            <summary>
+            ID of the user (elderly person) who this health log belongs to
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.HealthLog.Date">
+            <summary>
+            Date when the health measurements were taken
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.HealthLog.BloodPressure">
+            <summary>
+            Blood pressure reading (e.g., "120/80")
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.HealthLog.HeartRate">
+            <summary>
+            Heart rate in beats per minute (optional)
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.HealthLog.Note">
+            <summary>
+            Optional note about the health status or observations
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.HealthLog.CreatedAt">
+            <summary>
+            Timestamp when the health log was created
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.HealthLog.UpdatedAt">
+            <summary>
+            Timestamp when the health log was last updated
+            </summary>
+        </member>
+    </members>
+</doc>

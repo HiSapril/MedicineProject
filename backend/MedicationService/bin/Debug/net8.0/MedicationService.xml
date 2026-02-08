@@ -1,0 +1,228 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MedicationService</name>
+    </assembly>
+    <members>
+        <member name="T:MedicationService.Controllers.MedicationsController">
+            <summary>
+            RESTful API controller for managing medication schedules.
+            This is a minimal implementation with in-memory storage for demonstration purposes.
+            </summary>
+        </member>
+        <member name="M:MedicationService.Controllers.MedicationsController.GetAll">
+            <summary>
+            Get all medication schedules
+            </summary>
+            <returns>List of all medications</returns>
+            <response code="200">Returns the list of medications</response>
+        </member>
+        <member name="M:MedicationService.Controllers.MedicationsController.GetById(System.Guid)">
+            <summary>
+            Get a specific medication by ID
+            </summary>
+            <param name="id">The medication ID</param>
+            <returns>The medication if found</returns>
+            <response code="200">Returns the medication</response>
+            <response code="404">If the medication is not found</response>
+        </member>
+        <member name="M:MedicationService.Controllers.MedicationsController.Create(MedicationService.Models.DTOs.CreateMedicationDto)">
+            <summary>
+            Create a new medication schedule
+            </summary>
+            <param name="dto">The medication data</param>
+            <returns>The created medication</returns>
+            <response code="201">Returns the newly created medication</response>
+            <response code="400">If the data is invalid</response>
+        </member>
+        <member name="M:MedicationService.Controllers.MedicationsController.Update(System.Guid,MedicationService.Models.DTOs.UpdateMedicationDto)">
+            <summary>
+            Update an existing medication schedule
+            </summary>
+            <param name="id">The medication ID</param>
+            <param name="dto">The updated medication data</param>
+            <returns>The updated medication</returns>
+            <response code="200">Returns the updated medication</response>
+            <response code="404">If the medication is not found</response>
+            <response code="400">If the data is invalid</response>
+        </member>
+        <member name="M:MedicationService.Controllers.MedicationsController.Delete(System.Guid)">
+            <summary>
+            Delete a medication schedule
+            </summary>
+            <param name="id">The medication ID</param>
+            <returns>No content</returns>
+            <response code="204">If the medication was successfully deleted</response>
+            <response code="404">If the medication is not found</response>
+        </member>
+        <member name="T:MedicationService.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:MedicationService.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:MedicationService.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:MedicationService.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:MedicationService.Models.DTOs.CreateMedicationDto">
+            <summary>
+            Data Transfer Object for creating a new medication schedule
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.CreateMedicationDto.UserId">
+            <summary>
+            ID of the user who will take this medication
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.CreateMedicationDto.MedicationName">
+            <summary>
+            Name of the medication
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.CreateMedicationDto.Dosage">
+            <summary>
+            Dosage information
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.CreateMedicationDto.Frequency">
+            <summary>
+            Frequency description
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.CreateMedicationDto.ScheduledTimes">
+            <summary>
+            Scheduled times (e.g., "08:00, 20:00")
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.CreateMedicationDto.Instructions">
+            <summary>
+            Optional instructions for taking the medication
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.CreateMedicationDto.StartDate">
+            <summary>
+            Start date for the medication schedule
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.CreateMedicationDto.EndDate">
+            <summary>
+            Optional end date for the medication schedule
+            </summary>
+        </member>
+        <member name="T:MedicationService.Models.DTOs.MedicationResponseDto">
+            <summary>
+            Data Transfer Object for medication responses
+            </summary>
+        </member>
+        <member name="M:MedicationService.Models.DTOs.MedicationResponseDto.FromEntity(MedicationService.Models.Medication)">
+            <summary>
+            Maps a Medication entity to a response DTO
+            </summary>
+        </member>
+        <member name="T:MedicationService.Models.DTOs.UpdateMedicationDto">
+            <summary>
+            Data Transfer Object for updating an existing medication schedule.
+            All fields are optional to support partial updates.
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.UpdateMedicationDto.MedicationName">
+            <summary>
+            Updated medication name
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.UpdateMedicationDto.Dosage">
+            <summary>
+            Updated dosage
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.UpdateMedicationDto.Frequency">
+            <summary>
+            Updated frequency
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.UpdateMedicationDto.ScheduledTimes">
+            <summary>
+            Updated scheduled times
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.UpdateMedicationDto.Instructions">
+            <summary>
+            Updated instructions
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.UpdateMedicationDto.StartDate">
+            <summary>
+            Updated start date
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.DTOs.UpdateMedicationDto.EndDate">
+            <summary>
+            Updated end date
+            </summary>
+        </member>
+        <member name="T:MedicationService.Models.Medication">
+            <summary>
+            Represents a medication schedule in the system.
+            This is a first-class domain entity as per architecture rules.
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.Id">
+            <summary>
+            Unique identifier for the medication
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.UserId">
+            <summary>
+            ID of the user (elderly person) who takes this medication
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.MedicationName">
+            <summary>
+            Name of the medication
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.Dosage">
+            <summary>
+            Dosage information (e.g., "500mg", "2 tablets")
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.Frequency">
+            <summary>
+            Frequency description (e.g., "Daily", "Twice a day", "Every 8 hours")
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.ScheduledTimes">
+            <summary>
+            Scheduled times in simple string format (e.g., "08:00, 20:00")
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.Instructions">
+            <summary>
+            Additional instructions for taking the medication
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.StartDate">
+            <summary>
+            Start date for this medication schedule
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.EndDate">
+            <summary>
+            Optional end date for this medication schedule
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.CreatedAt">
+            <summary>
+            Timestamp when the medication was created
+            </summary>
+        </member>
+        <member name="P:MedicationService.Models.Medication.UpdatedAt">
+            <summary>
+            Timestamp when the medication was last updated
+            </summary>
+        </member>
+    </members>
+</doc>

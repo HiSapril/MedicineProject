@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: elderly-care-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - elderly-care-network
+
+  redis:
+    image: redis:latest
+    container_name: elderly-care-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - elderly-care-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: elderly-care-sqlserver
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=MySuperPwd123!
+    networks:
+      - elderly-care-network
+
+networks:
+  elderly-care-network:
+    driver: bridge

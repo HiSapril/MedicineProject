@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ReminderService</name>
+    </assembly>
+    <members>
+        <member name="T:ReminderService.Controllers.RemindersController">
+            <summary>
+            RESTful API controller for managing reminders.
+            This is a minimal implementation with in-memory storage.
+            NO scheduling logic or background services included.
+            </summary>
+        </member>
+        <member name="M:ReminderService.Controllers.RemindersController.GetAll">
+            <summary>
+            Get all reminders
+            </summary>
+            <returns>List of all reminders</returns>
+            <response code="200">Returns the list of reminders</response>
+        </member>
+        <member name="M:ReminderService.Controllers.RemindersController.GetById(System.Guid)">
+            <summary>
+            Get a specific reminder by ID
+            </summary>
+            <param name="id">The reminder ID</param>
+            <returns>The reminder if found</returns>
+            <response code="200">Returns the reminder</response>
+            <response code="404">If the reminder is not found</response>
+        </member>
+        <member name="M:ReminderService.Controllers.RemindersController.Create(ReminderService.Models.DTOs.CreateReminderDto)">
+            <summary>
+            Create a new reminder
+            </summary>
+            <param name="dto">The reminder data</param>
+            <returns>The created reminder</returns>
+            <response code="201">Returns the newly created reminder</response>
+            <response code="400">If the data is invalid</response>
+        </member>
+        <member name="M:ReminderService.Controllers.RemindersController.UpdateStatus(System.Guid,ReminderService.Models.DTOs.UpdateReminderStatusDto)">
+            <summary>
+            Update the status of a reminder
+            </summary>
+            <param name="id">The reminder ID</param>
+            <param name="dto">The status update data</param>
+            <returns>The updated reminder</returns>
+            <response code="200">Returns the updated reminder</response>
+            <response code="404">If the reminder is not found</response>
+            <response code="400">If the data is invalid</response>
+        </member>
+        <member name="M:ReminderService.Controllers.RemindersController.Delete(System.Guid)">
+            <summary>
+            Delete a reminder
+            </summary>
+            <param name="id">The reminder ID</param>
+            <returns>No content</returns>
+            <response code="204">If the reminder was successfully deleted</response>
+            <response code="404">If the reminder is not found</response>
+        </member>
+        <member name="T:ReminderService.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:ReminderService.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:ReminderService.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:ReminderService.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:ReminderService.Models.DTOs.CreateReminderDto">
+            <summary>
+            Data Transfer Object for creating a new reminder
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.DTOs.CreateReminderDto.UserId">
+            <summary>
+            ID of the user for this reminder
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.DTOs.CreateReminderDto.Type">
+            <summary>
+            Type of reminder (0 = Medication, 1 = Appointment, 2 = Exercise)
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.DTOs.CreateReminderDto.ReferenceId">
+            <summary>
+            Reference ID to the source entity (Medication or Appointment ID)
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.DTOs.CreateReminderDto.ScheduledTime">
+            <summary>
+            Scheduled time for the reminder
+            </summary>
+        </member>
+        <member name="T:ReminderService.Models.DTOs.ReminderResponseDto">
+            <summary>
+            Data Transfer Object for reminder responses
+            </summary>
+        </member>
+        <member name="M:ReminderService.Models.DTOs.ReminderResponseDto.FromEntity(ReminderService.Models.Reminder)">
+            <summary>
+            Maps a Reminder entity to a response DTO
+            </summary>
+        </member>
+        <member name="T:ReminderService.Models.DTOs.UpdateReminderStatusDto">
+            <summary>
+            Data Transfer Object for updating reminder status
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.DTOs.UpdateReminderStatusDto.Status">
+            <summary>
+            New status for the reminder (0 = Pending, 1 = Done, 2 = Missed)
+            </summary>
+        </member>
+        <member name="T:ReminderService.Models.ReminderType">
+            <summary>
+            Type of reminder
+            </summary>
+        </member>
+        <member name="F:ReminderService.Models.ReminderType.Medication">
+            <summary>
+            Reminder for medication
+            </summary>
+        </member>
+        <member name="F:ReminderService.Models.ReminderType.Appointment">
+            <summary>
+            Reminder for appointment
+            </summary>
+        </member>
+        <member name="F:ReminderService.Models.ReminderType.Exercise">
+            <summary>
+            Reminder for exercise
+            </summary>
+        </member>
+        <member name="T:ReminderService.Models.ReminderStatus">
+            <summary>
+            Status of reminder
+            </summary>
+        </member>
+        <member name="F:ReminderService.Models.ReminderStatus.Pending">
+            <summary>
+            Reminder is pending/scheduled
+            </summary>
+        </member>
+        <member name="F:ReminderService.Models.ReminderStatus.Done">
+            <summary>
+            Reminder was completed/acknowledged
+            </summary>
+        </member>
+        <member name="F:ReminderService.Models.ReminderStatus.Missed">
+            <summary>
+            Reminder was missed
+            </summary>
+        </member>
+        <member name="T:ReminderService.Models.Reminder">
+            <summary>
+            Represents a reminder in the system.
+            This entity stores reminder data without scheduling logic.
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.Reminder.Id">
+            <summary>
+            Unique identifier for the reminder
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.Reminder.UserId">
+            <summary>
+            ID of the user this reminder belongs to
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.Reminder.Type">
+            <summary>
+            Type of reminder (Medication, Appointment, Exercise)
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.Reminder.ReferenceId">
+            <summary>
+            Reference ID linking to the source entity (Medication ID or Appointment ID)
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.Reminder.ScheduledTime">
+            <summary>
+            Scheduled time for this reminder
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.Reminder.Status">
+            <summary>
+            Current status of the reminder
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.Reminder.CreatedAt">
+            <summary>
+            Timestamp when the reminder was created
+            </summary>
+        </member>
+        <member name="P:ReminderService.Models.Reminder.UpdatedAt">
+            <summary>
+            Timestamp when the reminder was last updated
+            </summary>
+        </member>
+    </members>
+</doc>
