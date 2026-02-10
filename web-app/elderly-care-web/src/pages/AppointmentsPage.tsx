@@ -1,33 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { appointmentApi, type CreateAppointmentPayload } from '../api/appointment.api';
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  User,
+  FileText,
+  ChevronRight,
+  XCircle,
+  CheckCircle,
+  AlertCircle,
+  History
+} from 'lucide-react';
 import { toast } from 'react-toastify';
+import './AppointmentsPage.css';
 
-// Define strict types locally to match API
 interface Appointment {
   id: string;
   doctorName: string;
   location: string;
   appointmentDate: string;
   notes?: string;
+  status?: 'Upcoming' | 'Completed' | 'Missed' | 'Cancelled';
 }
 
 const AppointmentsPage = () => {
-  // State
+  // --- State ---
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Form State
-  const [formData, setFormData] = useState<CreateAppointmentPayload>({
-    doctorName: '',
-    location: '',
-    appointmentDate: '',
-    notes: ''
-  });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  // Interaction State
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  // Initial Data Fetch
+  // --- Data Fetching ---
   useEffect(() => {
     fetchAppointments();
   }, []);
@@ -39,384 +46,194 @@ const AppointmentsPage = () => {
       setAppointments(response.data);
       setError('');
     } catch (err) {
-      setError('Unable to load appointments. Please try again later.');
+      setError('Unable to load appointments. Please check your connection.');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  // --- Logic & Grouping ---
+  const now = new Date();
+
+  const getAppointmentStatus = (apt: Appointment): string => {
+    if (apt.status === 'Cancelled') return 'cancelled';
+    const appointmentDate = new Date(apt.appointmentDate);
+
+    if (appointmentDate < now) {
+      // Logic: If past and we don't have a "completed" flag, we assume completed
+      // unless the system has a specific "missed" logic. For demo, we use temporal.
+      return 'completed';
+    }
+    return 'upcoming';
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.doctorName || !formData.appointmentDate || !formData.location) {
-      toast.warning('Please fill in Doctor Name, Date, and Location');
-      return;
-    }
-    // Date Validation: Cannot be in the past
-    const selectedDate = new Date(formData.appointmentDate);
-    if (selectedDate < new Date()) {
-      toast.error('Cannot schedule an appointment in the past.');
-      return;
-    }
+  const groupedAppointments = useMemo(() => {
+    const sorted = [...appointments].sort(
+      (a, b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime()
+    );
 
-    setSubmitting(true);
+    return {
+      upcoming: sorted.filter(apt => new Date(apt.appointmentDate) >= now),
+      past: sorted.filter(apt => new Date(apt.appointmentDate) < now).reverse() // Past visits in reverse chronological
+    };
+  }, [appointments]);
+
+  // --- Handlers ---
+  const handleCancelClick = async (apt: Appointment) => {
+    if (!window.confirm(`Are you sure you want to cancel the appointment with ${apt.doctorName}?`)) return;
+
     try {
-      if (editingId) {
-        await appointmentApi.update(editingId, formData);
-        toast.success('Appointment updated successfully');
-      } else {
-        await appointmentApi.create(formData);
-        toast.success('Appointment created successfully');
-      }
-
-      // Reset and refresh
-      setFormData({ doctorName: '', location: '', appointmentDate: '', notes: '' });
-      setEditingId(null);
+      // Mock cancellation by updating notes or just deleting if API doesn't support status
+      await appointmentApi.delete(apt.id);
+      toast.info('Appointment cancelled.');
       fetchAppointments();
     } catch (err) {
-      toast.error('Failed to save appointment');
-      console.error(err);
-    } finally {
-      setSubmitting(false);
+      toast.error('Failed to cancel appointment.');
     }
   };
 
-  const handleEdit = (apt: Appointment) => {
-    setEditingId(apt.id);
-    // Format date for datetime-local input (YYYY-MM-DDThh:mm)
-    // Assuming API returns simplified ISO string or similar, usually standardizing is good
-    // For simplicity, we assume the API string is close enough or we use it directly if compatible
-    // Ideally we parse it:
-    let dateStr = apt.appointmentDate;
-    try {
-      // Try to ensure it fits datetime-local format yyyy-MM-ddThh:mm
-      const dateObj = new Date(apt.appointmentDate);
-      if (!isNaN(dateObj.getTime())) {
-        // Adjust to local ISO string roughly
-        // Get local ISO string part
-        const offset = dateObj.getTimezoneOffset() * 60000;
-        const localISOTime = (new Date(dateObj.getTime() - offset)).toISOString().slice(0, 16);
-        dateStr = localISOTime;
-      }
-    } catch (e) {
-      console.warn("Date parsing fallback", e);
-    }
-
-    setFormData({
-      doctorName: apt.doctorName,
-      location: apt.location,
-      appointmentDate: dateStr,
-      notes: apt.notes || ''
-    });
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const formatDateParts = (dateIso: string) => {
+    const d = new Date(dateIso);
+    return {
+      day: d.getDate(),
+      month: d.toLocaleString('en-US', { month: 'short' }),
+      year: d.getFullYear(),
+      time: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+    };
   };
 
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setFormData({ doctorName: '', location: '', appointmentDate: '', notes: '' });
-  };
+  // --- Render Helpers ---
+  const AppointmentCard = ({ apt }: { apt: Appointment }) => {
+    const status = getAppointmentStatus(apt);
+    const { day, month, year, time } = formatDateParts(apt.appointmentDate);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this appointment?')) return;
+    return (
+      <div className={`appointment-card status-${status}`}>
+        <div className="date-sidestrip">
+          <span className="date-month">{month}</span>
+          <span className="date-day">{day}</span>
+          <span className="date-year">{year}</span>
+        </div>
 
-    try {
-      await appointmentApi.delete(id);
-      fetchAppointments();
-    } catch (err) {
-      alert('Failed to delete appointment');
-      console.error(err);
-    }
-  };
-
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Manage Appointments</h1>
-
-      {/* ERROR MESSAGE */}
-      {error && <div style={styles.errorBox}>{error}</div>}
-
-      {/* FORM SECTION */}
-      <div style={styles.formSection}>
-        <h2 style={styles.sectionTitle}>
-          {editingId ? 'Edit Appointment' : 'Schedule New Appointment'}
-        </h2>
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Doctor Name / Clinic *</label>
-            <input
-              style={styles.input}
-              name="doctorName"
-              value={formData.doctorName}
-              onChange={handleInputChange}
-              placeholder="e.g. Dr. Smiths"
-            />
+        <div className="appointment-main">
+          <div className="appointment-info">
+            <div className="appointment-badge">{status}</div>
+            <div className="appointment-time">
+              <Clock size={18} /> {time}
+            </div>
+            <h3 className="appointment-doctor">{apt.doctorName}</h3>
+            <div className="appointment-location">
+              <MapPin size={18} /> {apt.location}
+            </div>
           </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Location *</label>
-            <input
-              style={styles.input}
-              name="location"
-              value={formData.location}
-              onChange={handleInputChange}
-              placeholder="e.g. General Hospital Room 3B"
-            />
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Date & Time *</label>
-            <input
-              style={styles.input}
-              type="datetime-local"
-              name="appointmentDate"
-              value={formData.appointmentDate}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Notes (Optional)</label>
-            <textarea
-              style={{ ...styles.input, height: '80px' }}
-              name="notes"
-              value={formData.notes || ''}
-              onChange={handleInputChange}
-              placeholder="Bring medical reports..."
-            />
-          </div>
-
-          <div style={styles.buttonGroup}>
-            <button
-              type="submit"
-              style={styles.saveButton}
-              disabled={submitting}
-            >
-              {submitting ? 'Saving...' : (editingId ? 'Update Appointment' : 'Create Appointment')}
+          <div className="appointment-actions">
+            <button className="btn-action btn-details" onClick={() => setSelectedAppointment(apt)}>
+              View Details
             </button>
-
-            {editingId && (
+            {status === 'upcoming' && (
               <button
-                type="button"
-                onClick={handleCancelEdit}
-                style={styles.cancelButton}
+                className="btn-action btn-cancel-appt"
+                onClick={() => handleCancelClick(apt)}
               >
-                Cancel Edit
+                Cancel Visit
               </button>
             )}
           </div>
-        </form>
+        </div>
       </div>
+    );
+  };
 
-      {/* LIST SECTION */}
-      <div style={styles.listSection}>
-        <h2 style={styles.sectionTitle}>Upcoming Appointments</h2>
+  if (loading) return <div className="loading-view">Loading Appointments...</div>;
 
-        {loading ? (
-          <p style={styles.loadingText}>Loading appointments...</p>
-        ) : appointments.length === 0 ? (
-          <p style={styles.emptyText}>No appointments scheduled yet.</p>
-        ) : (
-          <div style={styles.list}>
-            {appointments.map(apt => (
-              <div key={apt.id} style={styles.card}>
-                <div style={styles.cardContent}>
-                  <h3 style={styles.cardTitle}>{apt.doctorName}</h3>
-                  <p style={styles.cardText}>
-                    <strong>Date:</strong> {new Date(apt.appointmentDate).toLocaleString()}
-                  </p>
-                  <p style={styles.cardText}>
-                    <strong>Location:</strong> {apt.location}
-                  </p>
-                  {apt.notes && (
-                    <p style={styles.cardText}>
-                      <strong>Notes:</strong> {apt.notes}
-                    </p>
-                  )}
-                </div>
-                <div style={styles.cardActions}>
-                  <button
-                    onClick={() => handleEdit(apt)}
-                    style={styles.editButton}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(apt.id)}
-                    style={styles.deleteButton}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+  return (
+    <div className="appointments-container">
+      <header className="appointments-header">
+        <h1>Appointments</h1>
+        <p>Your medical visits and scheduled care events.</p>
+      </header>
+
+      {error && <div className="error-box">{error}</div>}
+
+      <div className="appointments-content">
+        {/* Upcoming Section */}
+        <section className="appointment-section">
+          <h2 className="section-title">
+            <Calendar size={28} /> Upcoming Visits
+          </h2>
+          <div className="appointment-list">
+            {groupedAppointments.upcoming.length === 0 ? (
+              <p className="empty-text">No upcoming appointments scheduled.</p>
+            ) : (
+              groupedAppointments.upcoming.map(apt => (
+                <AppointmentCard key={apt.id} apt={apt} />
+              ))
+            )}
           </div>
-        )}
+        </section>
+
+        {/* Past Section */}
+        <section className="appointment-section">
+          <h2 className="section-title">
+            <History size={28} /> Past Appointments
+          </h2>
+          <div className="appointment-list">
+            {groupedAppointments.past.length === 0 ? (
+              <p className="empty-text">No past appointment records found.</p>
+            ) : (
+              groupedAppointments.past.map(apt => (
+                <AppointmentCard key={apt.id} apt={apt} />
+              ))
+            )}
+          </div>
+        </section>
       </div>
+
+      {/* --- Detail Modal --- */}
+      {selectedAppointment && (
+        <div className="modal-overlay" onClick={() => setSelectedAppointment(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Appointment Details</h2>
+            </div>
+            <div className="detail-modal-grid">
+              <div className="detail-block">
+                <span className="detail-label">Professional / Clinic</span>
+                <span className="detail-text">{selectedAppointment.doctorName}</span>
+              </div>
+              <div className="detail-block">
+                <span className="detail-label">Location</span>
+                <span className="detail-text">{selectedAppointment.location}</span>
+              </div>
+              <div className="detail-block">
+                <span className="detail-label">Date & Time</span>
+                <span className="detail-text">
+                  {new Date(selectedAppointment.appointmentDate).toLocaleString()}
+                </span>
+              </div>
+              {selectedAppointment.notes && (
+                <div className="detail-block">
+                  <span className="detail-label">Special Instructions</span>
+                  <span className="detail-text">{selectedAppointment.notes}</span>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer" style={{ marginTop: '2rem' }}>
+              <button
+                className="btn-action btn-details"
+                style={{ width: '100%', background: '#0f172a', color: 'white' }}
+                onClick={() => setSelectedAppointment(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-// Simple inline styles for elderly-friendly UI
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    padding: '20px',
-    maxWidth: '800px',
-    margin: '0 auto',
-    fontFamily: 'sans-serif',
-  },
-  title: {
-    fontSize: '32px',
-    color: '#2c3e50',
-    textAlign: 'center',
-    marginBottom: '30px',
-  },
-  sectionTitle: {
-    fontSize: '24px',
-    color: '#34495e',
-    marginBottom: '15px',
-    borderBottom: '2px solid #ecf0f1',
-    paddingBottom: '10px',
-  },
-  errorBox: {
-    backgroundColor: '#ffdddd',
-    color: '#c0392b',
-    padding: '15px',
-    marginBottom: '20px',
-    borderRadius: '5px',
-    fontSize: '18px',
-    textAlign: 'center',
-  },
-  formSection: {
-    backgroundColor: '#f9f9f9',
-    padding: '25px',
-    borderRadius: '10px',
-    marginBottom: '40px',
-    border: '1px solid #ddd',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '15px',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '5px',
-  },
-  label: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#555',
-  },
-  input: {
-    padding: '12px',
-    fontSize: '16px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '10px',
-    marginTop: '10px',
-  },
-  saveButton: {
-    padding: '15px 30px',
-    fontSize: '18px',
-    backgroundColor: '#27ae60',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    flex: 1,
-  },
-  cancelButton: {
-    padding: '15px 30px',
-    fontSize: '18px',
-    backgroundColor: '#95a5a6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  listSection: {
-    marginTop: '20px',
-  },
-  loadingText: {
-    fontSize: '20px',
-    color: '#7f8c8d',
-    textAlign: 'center',
-    padding: '20px',
-  },
-  emptyText: {
-    fontSize: '20px',
-    color: '#7f8c8d',
-    textAlign: 'center',
-    padding: '20px',
-    fontStyle: 'italic',
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  card: {
-    backgroundColor: 'white',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    padding: '20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-  },
-  cardContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: '22px',
-    margin: '0 0 10px 0',
-    color: '#2c3e50',
-  },
-  cardText: {
-    fontSize: '18px',
-    color: '#555',
-    margin: '5px 0',
-  },
-  cardActions: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-    marginLeft: '20px',
-  },
-  editButton: {
-    padding: '10px 20px',
-    fontSize: '16px',
-    backgroundColor: '#3498db',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    minWidth: '100px',
-  },
-  deleteButton: {
-    padding: '10px 20px',
-    fontSize: '16px',
-    backgroundColor: '#e74c3c',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    minWidth: '100px',
-  },
 };
 
 export default AppointmentsPage;

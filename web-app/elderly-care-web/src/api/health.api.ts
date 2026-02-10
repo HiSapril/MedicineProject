@@ -4,18 +4,22 @@ import axiosClient from "./axiosClient";
 export interface HealthLog {
     id: string;
     userId: string;
-    timestamp: string;
-    weight?: number;
-    bloodPressure?: string;
+    date: string;
+    bloodPressure: string;
     heartRate?: number;
-    notes?: string;
+    weight?: number;
+    note?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface CreateHealthLogPayload {
-    weight?: number;
-    bloodPressure?: string;
+    userId: string;
+    date: string;
+    bloodPressure: string;
     heartRate?: number;
-    notes?: string;
+    weight?: number;
+    note?: string;
 }
 
 export const healthApi = {

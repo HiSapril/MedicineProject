@@ -67,6 +67,18 @@
         <member name="M:HealthTrackingService.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:HealthTrackingService.Migrations.AddWeightToHealthLog">
+            <inheritdoc />
+        </member>
+        <member name="M:HealthTrackingService.Migrations.AddWeightToHealthLog.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HealthTrackingService.Migrations.AddWeightToHealthLog.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HealthTrackingService.Migrations.AddWeightToHealthLog.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:HealthTrackingService.Models.DTOs.CreateHealthLogDto">
             <summary>
             Data Transfer Object for creating a new health log entry
@@ -95,6 +107,11 @@
         <member name="P:HealthTrackingService.Models.DTOs.CreateHealthLogDto.Note">
             <summary>
             Optional note about health status
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.DTOs.CreateHealthLogDto.Weight">
+            <summary>
+            Weight in kilograms (optional)
             </summary>
         </member>
         <member name="T:HealthTrackingService.Models.DTOs.HealthLogResponseDto">
@@ -133,6 +150,11 @@
             Updated note
             </summary>
         </member>
+        <member name="P:HealthTrackingService.Models.DTOs.UpdateHealthLogDto.Weight">
+            <summary>
+            Updated weight
+            </summary>
+        </member>
         <member name="T:HealthTrackingService.Models.HealthLog">
             <summary>
             Represents a basic health log entry in the system.
@@ -167,6 +189,11 @@
         <member name="P:HealthTrackingService.Models.HealthLog.Note">
             <summary>
             Optional note about the health status or observations
+            </summary>
+        </member>
+        <member name="P:HealthTrackingService.Models.HealthLog.Weight">
+            <summary>
+            Weight in kilograms (optional)
             </summary>
         </member>
         <member name="P:HealthTrackingService.Models.HealthLog.CreatedAt">

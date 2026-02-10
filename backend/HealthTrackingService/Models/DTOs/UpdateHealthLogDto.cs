@@ -30,4 +30,10 @@ public class UpdateHealthLogDto
     /// </summary>
     [StringLength(1000)]
     public string? Note { get; set; }
+
+    /// <summary>
+    /// Updated weight
+    /// </summary>
+    [Range(20, 500)]
+    public double? Weight { get; set; }
 }

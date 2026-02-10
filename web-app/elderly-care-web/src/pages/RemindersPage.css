@@ -1,0 +1,341 @@
+/* RemindersPage.css */
+
+.reminders-container {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.reminders-header {
+    margin-bottom: 3rem;
+}
+
+.reminders-header h1 {
+    font-size: 2.5rem;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.reminders-header p {
+    font-size: 1.25rem;
+    color: #64748b;
+}
+
+/* Timeline Layout */
+.timeline-section {
+    margin-bottom: 3rem;
+    position: relative;
+    padding-left: 2rem;
+    border-left: 3px solid #e2e8f0;
+}
+
+.timeline-section::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    border: 3px solid white;
+}
+
+.timeline-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 1.5rem;
+    margin-top: -0.5rem;
+}
+
+.reminders-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Reminder Card */
+.reminder-card {
+    background: white;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reminder-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.reminder-icon-box {
+    width: 64px;
+    height: 64px;
+    background: #f1f5f9;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+.reminder-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.reminder-type-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+}
+
+.reminder-time {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+    margin: 0.25rem 0;
+}
+
+.reminder-description {
+    font-size: 1.25rem;
+    color: #475569;
+}
+
+/* Status Indicators */
+.status-indicator {
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* Color Coding */
+.status-upcoming {
+    border-left: 8px solid #2563eb;
+}
+
+.status-upcoming .reminder-icon-box {
+    color: #2563eb;
+    background: #dbeafe;
+}
+
+.status-upcoming .status-indicator {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-due-now {
+    border-left: 8px solid #ea580c;
+    background: #fffaf0;
+}
+
+.status-due-now .reminder-icon-box {
+    color: #ea580c;
+    background: #ffedd5;
+}
+
+.status-due-now .status-indicator {
+    background: #ea580c;
+    color: white;
+}
+
+.status-overdue {
+    border-left: 8px solid #f87171;
+}
+
+.status-overdue .reminder-icon-box {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.status-overdue .status-indicator {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-acknowledged {
+    border-left: 8px solid #16a34a;
+    opacity: 0.8;
+}
+
+.status-acknowledged .reminder-icon-box {
+    color: #16a34a;
+    background: #dcfce7;
+}
+
+.status-acknowledged .status-indicator {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* Actions */
+.reminder-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.btn-acknowledge {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    font-size: 1.125rem;
+    cursor: pointer;
+    min-height: 48px;
+    transition: background 0.2s;
+}
+
+.btn-acknowledge:hover {
+    background: #15803d;
+}
+
+.btn-snooze {
+    background: white;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    min-height: 48px;
+}
+
+.btn-detail {
+    background: transparent;
+    color: #64748b;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    width: fit-content;
+}
+
+/* Modals */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-content {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+    font-size: 1.75rem;
+    color: #0f172a;
+}
+
+.modal-body {
+    font-size: 1.125rem;
+    color: #475569;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-confirm {
+    flex: 1;
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    flex: 1;
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Detail Modal Extra */
+.detail-item {
+    text-align: left;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+}
+
+.detail-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.detail-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+@media (max-width: 640px) {
+    .reminder-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .reminder-icon-box {
+        margin: 0 auto;
+    }
+
+    .reminder-actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .reminders-header h1 {
+        font-size: 2rem;
+    }
+}

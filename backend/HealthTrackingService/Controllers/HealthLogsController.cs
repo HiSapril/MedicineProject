@@ -85,6 +85,7 @@ public class HealthLogsController : ControllerBase
             Date = dto.Date,
             BloodPressure = dto.BloodPressure,
             HeartRate = dto.HeartRate,
+            Weight = dto.Weight,
             Note = dto.Note,
             CreatedAt = now,
             UpdatedAt = now
@@ -133,6 +134,9 @@ public class HealthLogsController : ControllerBase
         
         if (dto.Note != null)
             healthLog.Note = dto.Note;
+        
+        if (dto.Weight.HasValue)
+            healthLog.Weight = dto.Weight;
 
         healthLog.UpdatedAt = DateTime.UtcNow;
 

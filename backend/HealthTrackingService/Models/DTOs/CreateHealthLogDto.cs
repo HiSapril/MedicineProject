@@ -37,4 +37,10 @@ public class CreateHealthLogDto
     /// </summary>
     [StringLength(1000)]
     public string? Note { get; set; }
+
+    /// <summary>
+    /// Weight in kilograms (optional)
+    /// </summary>
+    [Range(20, 500)]
+    public double? Weight { get; set; }
 }

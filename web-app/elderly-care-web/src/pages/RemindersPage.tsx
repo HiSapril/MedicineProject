@@ -1,440 +1,313 @@
-import { useEffect, useState } from 'react';
-import { reminderApi, type CreateReminderPayload } from '../api/reminder.api';
+import { useEffect, useState, useMemo } from 'react';
+import { reminderApi } from '../api/reminder.api';
+import {
+  Bell,
+  Pill,
+  Calendar,
+  Activity,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Timer,
+  ChevronRight,
+  History
+} from 'lucide-react';
+import { toast } from 'react-toastify';
+import './RemindersPage.css';
 
-// Interface matching the API response/structure
 interface Reminder {
   id: string;
   message: string;
   scheduledTime: string;
-  type?: string;
+  type?: 'Medication' | 'Appointment' | 'Health' | string;
+  isCompleted?: boolean;
 }
 
 const RemindersPage = () => {
-  // --- State Management ---
+  // --- State ---
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Form State
-  const [formData, setFormData] = useState<CreateReminderPayload>({
-    message: '',
-    scheduledTime: '',
-    type: 'Medication' // Default type
-  });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  // UI Interaction State
+  const [activeReminder, setActiveReminder] = useState<Reminder | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ reminder: Reminder, action: 'acknowledge' | 'snooze' } | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  // --- Effects ---
+  // --- Data Fetching ---
   useEffect(() => {
     fetchReminders();
+    // Refresh status every minute
+    const interval = setInterval(fetchReminders, 60000);
+    return () => clearInterval(interval);
   }, []);
 
-  // --- API Handlers ---
   const fetchReminders = async () => {
-    setLoading(true);
     try {
       const response = await reminderApi.getReminders();
-      setReminders(response.data);
+      // Sort chronologically
+      const sorted = (response.data as Reminder[]).sort(
+        (a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime()
+      );
+      setReminders(sorted);
       setError('');
     } catch (err) {
       console.error(err);
-      setError('Unable to load reminders. Please try again later.');
+      setError('Unable to load reminders. Please check your connection.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.message || !formData.scheduledTime) {
-      alert('Please fill in Message and Time');
-      return;
+  // --- Logic & Grouping ---
+  const now = new Date();
+
+  const getReminderStatus = (rem: Reminder) => {
+    if (rem.isCompleted) return 'acknowledged';
+    const scheduled = new Date(rem.scheduledTime);
+    const diffInMinutes = (scheduled.getTime() - now.getTime()) / 60000;
+
+    if (diffInMinutes < -15) return 'overdue';
+    if (diffInMinutes <= 0) return 'due-now';
+    if (diffInMinutes <= 60) return 'due-soon'; // Optimization for UX
+    return 'upcoming';
+  };
+
+  const groupedReminders = useMemo(() => {
+    const todayStr = now.toDateString();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toDateString();
+
+    return {
+      today: reminders.filter(r => new Date(r.scheduledTime).toDateString() === todayStr),
+      tomorrow: reminders.filter(r => new Date(r.scheduledTime).toDateString() === tomorrowStr),
+      upcoming: reminders.filter(r => {
+        const d = new Date(r.scheduledTime).toDateString();
+        return d !== todayStr && d !== tomorrowStr && new Date(r.scheduledTime) > now;
+      })
+    };
+  }, [reminders]);
+
+  const getIcon = (type?: string) => {
+    switch (type) {
+      case 'Medication': return <Pill size={32} />;
+      case 'Appointment': return <Calendar size={32} />;
+      case 'Health': return <Activity size={32} />;
+      default: return <Bell size={32} />;
     }
+  };
 
-    setSubmitting(true);
+  // --- Handlers ---
+  const handleAcknowledge = async () => {
+    if (!confirmAction) return;
+    setActionLoading(true);
     try {
-      if (editingId) {
-        await reminderApi.updateReminder(editingId, formData);
-        alert('Reminder updated successfully');
-      } else {
-        await reminderApi.createReminder(formData);
-        alert('Reminder created successfully');
-      }
+      // Logic from MedicationsPage: mark as completed
+      await reminderApi.updateReminder(confirmAction.reminder.id, {
+        ...confirmAction.reminder,
+        type: 'Acknowledged' // Mocking status update
+      } as any);
 
-      // Reset
-      setFormData({ message: '', scheduledTime: '', type: 'Medication' });
-      setEditingId(null);
-      fetchReminders();
+      setReminders(prev => prev.map(r =>
+        r.id === confirmAction.reminder.id ? { ...r, isCompleted: true } : r
+      ));
+
+      toast.success('Reminder acknowledged.');
+      setConfirmAction(null);
     } catch (err) {
-      console.error(err);
-      alert('Failed to save reminder');
+      toast.error('Failed to update reminder.');
     } finally {
-      setSubmitting(false);
+      setActionLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this reminder?')) return;
-
+  const handleSnooze = async (minutes: number) => {
+    if (!confirmAction) return;
+    setActionLoading(true);
     try {
-      await reminderApi.deleteReminder(id);
-      fetchReminders();
+      const newTime = new Date(new Date(confirmAction.reminder.scheduledTime).getTime() + minutes * 60000);
+      await reminderApi.updateReminder(confirmAction.reminder.id, {
+        scheduledTime: newTime.toISOString()
+      });
+
+      setReminders(prev => prev.map(r =>
+        r.id === confirmAction.reminder.id ? { ...r, scheduledTime: newTime.toISOString() } : r
+      ));
+
+      toast.info(`Snoozed for ${minutes} minutes.`);
+      setConfirmAction(null);
     } catch (err) {
-      console.error(err);
-      alert('Failed to delete reminder');
+      toast.error('Failed to snooze reminder.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  // --- UI Handlers ---
-  const handleEdit = (rem: Reminder) => {
-    setEditingId(rem.id);
-
-    // Attempt to format date for input if possible, similar to AppointmentsPage logic
-    let dateStr = rem.scheduledTime;
-    try {
-      const dateObj = new Date(rem.scheduledTime);
-      if (!isNaN(dateObj.getTime())) {
-        const offset = dateObj.getTimezoneOffset() * 60000;
-        dateStr = (new Date(dateObj.getTime() - offset)).toISOString().slice(0, 16);
-      }
-    } catch (e) {
-      console.warn("Date parsing fallback", e);
-    }
-
-    setFormData({
-      message: rem.message,
-      scheduledTime: dateStr,
-      type: rem.type || 'Medication'
-    });
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const formatTime = (isoString: string) => {
+    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setFormData({ message: '', scheduledTime: '', type: 'Medication' });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // --- Render ---
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Reminders</h1>
-
-      {/* ERROR DISPLAY */}
-      {error && <div style={styles.errorBox}>{error}</div>}
-
-      {/* FORM SECTION */}
-      <div style={styles.formSection}>
-        <h2 style={styles.sectionTitle}>
-          {editingId ? 'Edit Reminder' : 'Set New Reminder'}
-        </h2>
-
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Message *</label>
-            <input
-              style={styles.input}
-              name="message"
-              value={formData.message}
-              onChange={handleInputChange}
-              placeholder="e.g. Check Blood Pressure"
-            />
-          </div>
-
-          <div style={styles.row}>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Time *</label>
-              <input
-                style={styles.input}
-                type="datetime-local"
-                name="scheduledTime"
-                value={formData.scheduledTime}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Type *</label>
-              <select
-                style={styles.select}
-                name="type"
-                value={formData.type}
-                onChange={handleInputChange}
-              >
-                <option value="Medication">Medication</option>
-                <option value="Appointment">Appointment</option>
-                <option value="Exercise">Exercise</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-
-          <div style={styles.buttonGroup}>
-            <button
-              type="submit"
-              style={styles.saveButton}
-              disabled={submitting}
-            >
-              {submitting ? 'Saving...' : (editingId ? 'Update Reminder' : 'Add Reminder')}
-            </button>
-
-            {editingId && (
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                style={styles.cancelButton}
-              >
-                Cancel Edit
-              </button>
-            )}
-          </div>
-        </form>
-      </div>
-
-      {/* LIST SECTION */}
-      <div style={styles.listSection}>
-        <h2 style={styles.sectionTitle}>Upcoming Reminders</h2>
-
-        {loading ? (
-          <p style={styles.loadingText}>Loading reminders...</p>
-        ) : reminders.length === 0 ? (
-          <p style={styles.emptyText}>No reminders set yet.</p>
-        ) : (
-          <div style={styles.list}>
-            {reminders.map(rem => (
-              <div key={rem.id} style={styles.card}>
-                <div style={styles.cardContent}>
-                  <div style={styles.cardHeader}>
-                    <h3 style={styles.cardTitle}>{rem.message}</h3>
-                    {rem.type && (
-                      <span style={styles.typeTag}>{rem.type}</span>
-                    )}
-                  </div>
-                  <p style={styles.cardText}>
-                    <strong>Time:</strong> {new Date(rem.scheduledTime).toLocaleString()}
-                  </p>
+  // --- Render Helpers ---
+  const ReminderList = ({ items, title }: { items: Reminder[], title: string }) => {
+    if (items.length === 0) return null;
+    return (
+      <section className="timeline-section">
+        <h2 className="timeline-title">{title}</h2>
+        <div className="reminders-grid">
+          {items.map(rem => {
+            const status = getReminderStatus(rem);
+            return (
+              <div key={rem.id} className={`reminder-card status-${status}`}>
+                <div className="reminder-icon-box">
+                  {getIcon(rem.type)}
                 </div>
 
-                <div style={styles.cardActions}>
-                  <button
-                    onClick={() => handleEdit(rem)}
-                    style={styles.editButton}
-                  >
-                    Edit
+                <div className="reminder-content">
+                  <span className="reminder-type-label">{rem.type || 'General'}</span>
+                  <div className="reminder-time">{formatTime(rem.scheduledTime)}</div>
+                  <div className="reminder-description">{rem.message}</div>
+                  <button className="btn-detail" onClick={() => setActiveReminder(rem)}>
+                    View Details
                   </button>
-                  <button
-                    onClick={() => handleDelete(rem.id)}
-                    style={styles.deleteButton}
-                  >
-                    Delete
-                  </button>
+                </div>
+
+                <div className="reminder-actions">
+                  <div className="status-indicator">
+                    {status.replace('-', ' ').toUpperCase()}
+                  </div>
+                  {!rem.isCompleted && (
+                    <>
+                      <button
+                        className="btn-acknowledge"
+                        onClick={() => setConfirmAction({ reminder: rem, action: 'acknowledge' })}
+                      >
+                        Acknowledge
+                      </button>
+                      <button
+                        className="btn-snooze"
+                        onClick={() => setConfirmAction({ reminder: rem, action: 'snooze' })}
+                      >
+                        Snooze
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-            ))}
+            );
+          })}
+        </div>
+      </section>
+    );
+  };
+
+  if (loading) return <div className="loading-view">Loading...</div>;
+
+  return (
+    <div className="reminders-container">
+      <header className="reminders-header">
+        <h1>Reminders</h1>
+        <p>Upcoming tasks and important alerts for your well-being.</p>
+      </header>
+
+      {error && <div className="error-box">{error}</div>}
+
+      <div className="reminders-content">
+        <ReminderList items={groupedReminders.today} title="Today" />
+        <ReminderList items={groupedReminders.tomorrow} title="Tomorrow" />
+        <ReminderList items={groupedReminders.upcoming} title="Upcoming" />
+
+        {reminders.length === 0 && (
+          <div className="empty-state">
+            <Bell size={64} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+            <p>No reminders scheduled at the moment.</p>
           </div>
         )}
       </div>
+
+      {/* --- Modals --- */}
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>{confirmAction.action === 'acknowledge' ? 'Confirm Action' : 'Snooze Reminder'}</h2>
+            </div>
+            <div className="modal-body">
+              {confirmAction.action === 'acknowledge' ? (
+                <p>Are you sure you have completed <strong>{confirmAction.reminder.message}</strong>?</p>
+              ) : (
+                <div className="snooze-options">
+                  <p>Choose snooze duration:</p>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <button className="btn-snooze" onClick={() => handleSnooze(15)}>15 min</button>
+                    <button className="btn-snooze" onClick={() => handleSnooze(60)}>1 hour</button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn-cancel"
+                onClick={() => setConfirmAction(null)}
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+              {confirmAction.action === 'acknowledge' && (
+                <button
+                  className="btn-confirm"
+                  onClick={handleAcknowledge}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? 'Saving...' : 'Confirm'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {activeReminder && (
+        <div className="modal-overlay" onClick={() => setActiveReminder(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Reminder Details</h2>
+            </div>
+            <div className="modal-body">
+              <div className="detail-item">
+                <span className="detail-label">Task</span>
+                <span className="detail-value">{activeReminder.message}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Category</span>
+                <span className="detail-value">{activeReminder.type || 'General'}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Scheduled Time</span>
+                <span className="detail-value">
+                  {new Date(activeReminder.scheduledTime).toLocaleString()}
+                </span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Status</span>
+                <span className="detail-value" style={{ textTransform: 'capitalize' }}>
+                  {getReminderStatus(activeReminder).replace('-', ' ')}
+                </span>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancel" style={{ flex: 1 }} onClick={() => setActiveReminder(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-// --- Styles (Elderly Friendly) ---
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    padding: '20px',
-    maxWidth: '800px',
-    margin: '0 auto',
-    fontFamily: 'sans-serif',
-    color: '#333',
-  },
-  title: {
-    fontSize: '32px',
-    color: '#2c3e50',
-    textAlign: 'center',
-    marginBottom: '30px',
-  },
-  sectionTitle: {
-    fontSize: '24px',
-    color: '#34495e',
-    marginBottom: '15px',
-    borderBottom: '2px solid #ecf0f1',
-    paddingBottom: '10px',
-  },
-  errorBox: {
-    backgroundColor: '#ffdddd',
-    color: '#c0392b',
-    padding: '15px',
-    marginBottom: '20px',
-    borderRadius: '8px',
-    fontSize: '18px',
-    textAlign: 'center',
-    border: '1px solid #e74c3c',
-  },
-  formSection: {
-    backgroundColor: '#fff',
-    padding: '25px',
-    borderRadius: '12px',
-    marginBottom: '40px',
-    border: '1px solid #ddd',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  row: {
-    display: 'flex',
-    gap: '20px',
-    flexWrap: 'wrap',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  label: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#444',
-  },
-  input: {
-    padding: '14px',
-    fontSize: '18px',
-    borderRadius: '8px',
-    border: '1px solid #bdc3c7',
-    backgroundColor: '#fdfdfd',
-  },
-  select: {
-    padding: '14px',
-    fontSize: '18px',
-    borderRadius: '8px',
-    border: '1px solid #bdc3c7',
-    backgroundColor: '#fdfdfd',
-    cursor: 'pointer',
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '15px',
-    marginTop: '10px',
-  },
-  saveButton: {
-    padding: '16px 32px',
-    fontSize: '20px',
-    fontWeight: 'bold',
-    backgroundColor: '#9b59b6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    flex: 2,
-    transition: 'background-color 0.2s',
-  },
-  cancelButton: {
-    padding: '16px 24px',
-    fontSize: '18px',
-    backgroundColor: '#95a5a6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    flex: 1,
-  },
-  listSection: {
-    marginTop: '20px',
-  },
-  loadingText: {
-    fontSize: '22px',
-    color: '#7f8c8d',
-    textAlign: 'center',
-    padding: '40px',
-  },
-  emptyText: {
-    fontSize: '20px',
-    color: '#7f8c8d',
-    textAlign: 'center',
-    padding: '30px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '8px',
-    fontStyle: 'italic',
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  card: {
-    backgroundColor: 'white',
-    border: '1px solid #e0e0e0',
-    borderRadius: '12px',
-    padding: '25px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
-  },
-  cardContent: {
-    flex: 1,
-    marginRight: '20px',
-  },
-  cardHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '15px',
-    marginBottom: '10px',
-    flexWrap: 'wrap',
-  },
-  cardTitle: {
-    fontSize: '26px',
-    margin: '0',
-    color: '#8e44ad',
-  },
-  typeTag: {
-    backgroundColor: '#e8daef',
-    color: '#8e44ad',
-    padding: '4px 12px',
-    borderRadius: '20px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-  },
-  cardText: {
-    fontSize: '20px',
-    color: '#555',
-    margin: '5px 0',
-    lineHeight: '1.4',
-  },
-  cardActions: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    minWidth: '120px',
-  },
-  editButton: {
-    padding: '12px 20px',
-    fontSize: '18px',
-    backgroundColor: '#3498db',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-  },
-  deleteButton: {
-    padding: '12px 20px',
-    fontSize: '18px',
-    backgroundColor: '#e74c3c',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-  },
 };
 
 export default RemindersPage;

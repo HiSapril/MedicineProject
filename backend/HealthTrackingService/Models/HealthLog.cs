@@ -37,6 +37,11 @@ public class HealthLog
     public string? Note { get; set; }
 
     /// <summary>
+    /// Weight in kilograms (optional)
+    /// </summary>
+    public double? Weight { get; set; }
+
+    /// <summary>
     /// Timestamp when the health log was created
     /// </summary>
     public DateTime CreatedAt { get; set; }

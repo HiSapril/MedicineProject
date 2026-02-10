@@ -1,15 +1,15 @@
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Header.css";
 
 export default function Header() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.clear();
+    logout();
     navigate("/login");
   };
 
@@ -29,10 +29,12 @@ export default function Header() {
 
       <div className="header-right">
         {user && (
-          <div className="user-info">
-            <span className="user-name">{t('welcome', { name: user.name })}</span>
-            <span className="user-email">{user.email}</span>
-          </div>
+          <Link to="/app/profile" className="user-info-link">
+            <div className="user-info">
+              <span className="user-name">{t('welcome', { name: user.name })}</span>
+              <span className="user-email">{user.email}</span>
+            </div>
+          </Link>
         )}
         <button onClick={handleLogout} className="logout-button">
           {t('logout')}

@@ -11,6 +11,7 @@ public class HealthLogResponseDto
     public string BloodPressure { get; set; } = string.Empty;
     public int? HeartRate { get; set; }
     public string? Note { get; set; }
+    public double? Weight { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
@@ -27,6 +28,7 @@ public class HealthLogResponseDto
             BloodPressure = healthLog.BloodPressure,
             HeartRate = healthLog.HeartRate,
             Note = healthLog.Note,
+            Weight = healthLog.Weight,
             CreatedAt = healthLog.CreatedAt,
             UpdatedAt = healthLog.UpdatedAt
         };

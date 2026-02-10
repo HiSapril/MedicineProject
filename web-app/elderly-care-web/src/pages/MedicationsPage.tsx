@@ -1,417 +1,327 @@
-import { useEffect, useState } from 'react';
-import { medicationApi, type CreateMedicationPayload, type Medication } from '../api/medication.api';
+import { useEffect, useState, useMemo } from 'react';
+import { medicationApi, type Medication } from '../api/medication.api';
+import { reminderApi } from '../api/reminder.api';
+import {
+  Pill,
+  Clock,
+  Info,
+  Calendar,
+  History,
+  RotateCcw
+} from 'lucide-react';
+import './MedicationsPage.css';
+import { toast } from 'react-toastify';
 
+interface ReminderInstance {
+  id: string;
+  message: string;
+  scheduledTime: string;
+  isCompleted: boolean;
+  type?: string;
+  medicationId?: string; // Optional if existing in API
+}
 
 const MedicationsPage = () => {
-  // --- State Management ---
+  // --- State ---
   const [medications, setMedications] = useState<Medication[]>([]);
+  const [reminders, setReminders] = useState<ReminderInstance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Form State
-  const [formData, setFormData] = useState<CreateMedicationPayload>({
-    name: '',
-    dosage: '',
-    time: '',
-    notes: ''
-  });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  // Interaction State
+  const [detailMed, setDetailMed] = useState<Medication | null>(null);
+  const [confirmingReminder, setConfirmingReminder] = useState<ReminderInstance | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  // --- Effects ---
+  // --- Data Fetching ---
   useEffect(() => {
-    fetchMedications();
+    fetchData();
   }, []);
 
-  // --- API Handlers ---
-  const fetchMedications = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await medicationApi.getMedications();
-      setMedications(response.data);
+      const [medRes, remRes] = await Promise.all([
+        medicationApi.getMedications(),
+        reminderApi.getReminders()
+      ]);
+      setMedications(medRes.data);
+      setReminders(remRes.data);
       setError('');
     } catch (err) {
       console.error(err);
-      setError('Unable to load medications. Please try again later.');
+      setError('Unable to load medication data. Please check your connection.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.dosage || !formData.time) {
-      alert('Please fill in Name, Dosage, and Time');
-      return;
-    }
+  // --- Logic ---
+  const today = new Date().toDateString();
 
-    setSubmitting(true);
+  const todaySchedule = useMemo(() => {
+    return reminders
+      .filter(r => new Date(r.scheduledTime).toDateString() === today)
+      .sort((a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime());
+  }, [reminders, today]);
+
+  const historyLogs = useMemo(() => {
+    return reminders
+      .filter(r => new Date(r.scheduledTime).toDateString() !== today)
+      .sort((a, b) => new Date(b.scheduledTime).getTime() - new Date(a.scheduledTime).getTime())
+      .slice(0, 10); // Show last 10 entries
+  }, [reminders, today]);
+
+  const getStatus = (reminder: ReminderInstance) => {
+    if (reminder.isCompleted) return 'taken';
+    const scheduledDate = new Date(reminder.scheduledTime);
+    const now = new Date();
+    if (scheduledDate < now) return 'missed';
+    return 'upcoming';
+  };
+
+  const findMedInfo = (message: string) => {
+    // Attempt to match reminder message with medication name
+    return medications.find(m => message.toLowerCase().includes(m.name.toLowerCase()));
+  };
+
+  // --- Handlers ---
+  const handleMarkAsTaken = async () => {
+    if (!confirmingReminder) return;
+
+    setActionLoading(true);
     try {
-      if (editingId) {
-        await medicationApi.updateMedication(editingId, formData);
-        alert('Medication updated successfully');
-      } else {
-        await medicationApi.createMedication(formData);
-        alert('Medication added successfully');
-      }
+      await reminderApi.updateReminder(confirmingReminder.id, {
+        scheduledTime: confirmingReminder.scheduledTime,
+        message: confirmingReminder.message,
+        type: 'MedicationMarkedTaken' // Custom flag or just update status
+      } as any);
 
-      // Reset
-      setFormData({ name: '', dosage: '', time: '', notes: '' });
-      setEditingId(null);
-      fetchMedications();
+      // Note: The mock API might not support a dedicated "toggle" field yet,
+      // but we update the local state to show immediate feedback.
+      setReminders(prev => prev.map(r =>
+        r.id === confirmingReminder.id ? { ...r, isCompleted: true } : r
+      ));
+
+      toast.success(`${confirmingReminder.message} marked as taken.`);
     } catch (err) {
       console.error(err);
-      alert('Failed to save medication');
+      toast.error('Failed to update status. Please try again.');
     } finally {
-      setSubmitting(false);
+      setActionLoading(false);
+      setConfirmingReminder(null);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this medication?')) return;
-
+  const handleUndoTaken = async (reminder: ReminderInstance) => {
+    setActionLoading(true);
     try {
-      await medicationApi.deleteMedication(id);
-      fetchMedications();
-    } catch (err) {
-      console.error(err);
-      alert('Failed to delete medication');
+      // Mock undo logic
+      setReminders(prev => prev.map(r =>
+        r.id === reminder.id ? { ...r, isCompleted: false } : r
+      ));
+      toast.info('Action undone.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  // --- UI Handlers ---
-  const handleEdit = (med: Medication) => {
-    setEditingId(med.id);
-    setFormData({
-      name: med.name,
-      dosage: med.dosage,
-      time: med.time,
-      notes: med.notes || ''
-    });
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // --- Sub-components ---
+  const StatusBadge = ({ status }: { status: string }) => {
+    const labels: Record<string, string> = {
+      taken: 'Taken',
+      upcoming: 'Upcoming',
+      missed: 'Missed'
+    };
+    return (
+      <span className={`status - badge status - ${status} `}>
+        {labels[status]}
+      </span>
+    );
   };
 
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setFormData({ name: '', dosage: '', time: '', notes: '' });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // --- Render ---
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Daily Medications</h1>
-
-      {/* ERROR DISPLAY */}
-      {error && <div style={styles.errorBox}>{error}</div>}
-
-      {/* FORM SECTION */}
-      <div style={styles.formSection}>
-        <h2 style={styles.sectionTitle}>
-          {editingId ? 'Edit Medication' : 'Add New Medication'}
-        </h2>
-
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Medication Name *</label>
-            <input
-              style={styles.input}
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="e.g. Aspirin"
-            />
-          </div>
-
-          <div style={styles.row}>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Dosage *</label>
-              <input
-                style={styles.input}
-                name="dosage"
-                value={formData.dosage}
-                onChange={handleInputChange}
-                placeholder="e.g. 1 pill"
-              />
-            </div>
-
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Time of Day *</label>
-              <input
-                style={styles.input}
-                name="time"
-                value={formData.time}
-                onChange={handleInputChange}
-                placeholder="e.g. Morning (8 AM)"
-              />
-            </div>
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Notes (Optional)</label>
-            <textarea
-              style={{ ...styles.input, height: '80px' }}
-              name="notes"
-              value={formData.notes || ''}
-              onChange={handleInputChange}
-              placeholder="Take with food..."
-            />
-          </div>
-
-          <div style={styles.buttonGroup}>
-            <button
-              type="submit"
-              style={styles.saveButton}
-              disabled={submitting}
-            >
-              {submitting ? 'Saving...' : (editingId ? 'Update Medication' : 'Add Medication')}
-            </button>
-
-            {editingId && (
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                style={styles.cancelButton}
-              >
-                Cancel Edit
-              </button>
-            )}
-          </div>
-        </form>
-      </div>
-
-      {/* LIST SECTION */}
-      <div style={styles.listSection}>
-        <h2 style={styles.sectionTitle}>Current Medications</h2>
-
-        {loading ? (
-          <p style={styles.loadingText}>Loading medications...</p>
-        ) : medications.length === 0 ? (
-          <p style={styles.emptyText}>No medications recorded yet.</p>
-        ) : (
-          <div style={styles.list}>
-            {medications.map(med => (
-              <div key={med.id} style={styles.card}>
-                <div style={styles.cardContent}>
-                  <h3 style={styles.cardTitle}>{med.name}</h3>
-                  <div style={styles.cardDetails}>
-                    <p style={styles.cardText}>
-                      <strong>Dosage:</strong> {med.dosage}
-                    </p>
-                    <p style={styles.cardText}>
-                      <strong>Time:</strong> {med.time}
-                    </p>
-                  </div>
-                  {med.notes && (
-                    <p style={styles.cardText}>
-                      <strong>Notes:</strong> {med.notes}
-                    </p>
-                  )}
-                </div>
-
-                <div style={styles.cardActions}>
-                  <button
-                    onClick={() => handleEdit(med)}
-                    style={styles.editButton}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(med.id)}
-                    style={styles.deleteButton}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+  if (loading) return (
+    <div className="loading-view">
+      <div className="loading-spinner"></div>
+      <p>Loading Medications...</p>
     </div>
   );
-};
 
-// --- Styles (Elderly Friendly) ---
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    padding: '20px',
-    maxWidth: '800px',
-    margin: '0 auto',
-    fontFamily: 'sans-serif',
-    color: '#333',
-  },
-  title: {
-    fontSize: '32px',
-    color: '#2c3e50',
-    textAlign: 'center',
-    marginBottom: '30px',
-  },
-  sectionTitle: {
-    fontSize: '24px',
-    color: '#34495e',
-    marginBottom: '15px',
-    borderBottom: '2px solid #ecf0f1',
-    paddingBottom: '10px',
-  },
-  errorBox: {
-    backgroundColor: '#ffdddd',
-    color: '#c0392b',
-    padding: '15px',
-    marginBottom: '20px',
-    borderRadius: '8px',
-    fontSize: '18px',
-    textAlign: 'center',
-    border: '1px solid #e74c3c',
-  },
-  formSection: {
-    backgroundColor: '#fff',
-    padding: '25px',
-    borderRadius: '12px',
-    marginBottom: '40px',
-    border: '1px solid #ddd',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  row: {
-    display: 'flex',
-    gap: '20px',
-    flexWrap: 'wrap',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  label: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#444',
-  },
-  input: {
-    padding: '14px',
-    fontSize: '18px',
-    borderRadius: '8px',
-    border: '1px solid #bdc3c7',
-    backgroundColor: '#fdfdfd',
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '15px',
-    marginTop: '10px',
-  },
-  saveButton: {
-    padding: '16px 32px',
-    fontSize: '20px',
-    fontWeight: 'bold',
-    backgroundColor: '#27ae60',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    flex: 2,
-    transition: 'background-color 0.2s',
-  },
-  cancelButton: {
-    padding: '16px 24px',
-    fontSize: '18px',
-    backgroundColor: '#95a5a6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    flex: 1,
-  },
-  listSection: {
-    marginTop: '20px',
-  },
-  loadingText: {
-    fontSize: '22px',
-    color: '#7f8c8d',
-    textAlign: 'center',
-    padding: '40px',
-  },
-  emptyText: {
-    fontSize: '20px',
-    color: '#7f8c8d',
-    textAlign: 'center',
-    padding: '30px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '8px',
-    fontStyle: 'italic',
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  card: {
-    backgroundColor: 'white',
-    border: '1px solid #e0e0e0',
-    borderRadius: '12px',
-    padding: '25px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
-  },
-  cardContent: {
-    flex: 1,
-    marginRight: '20px',
-  },
-  cardTitle: {
-    fontSize: '26px',
-    margin: '0 0 15px 0',
-    color: '#2980b9',
-  },
-  cardDetails: {
-    display: 'flex',
-    gap: '30px',
-    marginBottom: '10px',
-    flexWrap: 'wrap',
-  },
-  cardText: {
-    fontSize: '20px',
-    color: '#555',
-    margin: '5px 0',
-    lineHeight: '1.4',
-  },
-  cardActions: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    minWidth: '120px',
-  },
-  editButton: {
-    padding: '12px 20px',
-    fontSize: '18px',
-    backgroundColor: '#3498db',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-  },
-  deleteButton: {
-    padding: '12px 20px',
-    fontSize: '18px',
-    backgroundColor: '#e74c3c',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-  },
+  return (
+    <div className="medications-container">
+      {/* 1. Header */}
+      <header className="medications-header">
+        <h1>Medications</h1>
+        <p>Manage daily medication schedules and track intake status for elderly well-being.</p>
+      </header>
+
+      {error && <div className="error-box">{error}</div>}
+
+      <div className="medications-content">
+        {/* 2. Today's Schedule */}
+        <section className="medications-section">
+          <h2 className="section-title">
+            <Calendar size={24} /> Today's Schedule
+          </h2>
+
+          {todaySchedule.length === 0 ? (
+            <div className="empty-state">
+              <Pill size={48} />
+              <p>No medications scheduled for today.</p>
+            </div>
+          ) : (
+            <div className="schedule-grid">
+              {todaySchedule.map(reminder => {
+                const status = getStatus(reminder);
+                const medInfo = findMedInfo(reminder.message);
+
+                return (
+                  <div key={reminder.id} className={`medication - card ${status} `}>
+                    <div className="medication-info">
+                      <h3>{reminder.message}</h3>
+                      <div className="medication-meta">
+                        <div className="meta-item">
+                          <Clock size={18} />
+                          {new Date(reminder.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                        {medInfo && (
+                          <div className="meta-item">
+                            <Info size={18} />
+                            {medInfo.dosage}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <StatusBadge status={status} />
+
+                    <div className="card-actions">
+                      {status !== 'taken' ? (
+                        <button
+                          className="btn-taken"
+                          onClick={() => setConfirmingReminder(reminder)}
+                        >
+                          Mark as Taken
+                        </button>
+                      ) : (
+                        <button
+                          className="btn-taken btn-undo"
+                          onClick={() => handleUndoTaken(reminder)}
+                          style={{ backgroundColor: '#64748b' }}
+                        >
+                          <RotateCcw size={18} /> Undo
+                        </button>
+                      )}
+
+                      {medInfo && (
+                        <button
+                          className="btn-details"
+                          onClick={() => setDetailMed(medInfo)}
+                        >
+                          Details
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* 3. History Section */}
+        <section className="medications-section history-section">
+          <h2 className="section-title">
+            <History size={24} /> Medication History
+          </h2>
+          <div className="history-list">
+            {historyLogs.length === 0 ? (
+              <p className="empty-history">No recent history logs.</p>
+            ) : (
+              historyLogs.map(log => (
+                <div key={log.id} className="history-item">
+                  <div className="history-info">
+                    <span className="history-med-name">{log.message}</span>
+                    <span className="history-time">
+                      {new Date(log.scheduledTime).toLocaleString([], {
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                      })}
+                    </span>
+                  </div>
+                  <StatusBadge status={getStatus(log)} />
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* --- Modals --- */}
+
+      {/* Confirmation Modal */}
+      {confirmingReminder && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div style={{ color: '#2563eb', marginBottom: '1rem' }}>
+              <Pill size={48} />
+            </div>
+            <h2>Confirm Intake</h2>
+            <p>Are you sure <strong>{confirmingReminder.message}</strong> was taken as scheduled?</p>
+            <div className="modal-actions">
+              <button
+                className="btn-cancel"
+                onClick={() => setConfirmingReminder(null)}
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-confirm"
+                onClick={handleMarkAsTaken}
+                disabled={actionLoading}
+              >
+                {actionLoading ? 'Updating...' : 'Yes, Marked as Taken'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Details Modal */}
+      {detailMed && (
+        <div className="modal-overlay" onClick={() => setDetailMed(null)}>
+          <div className="modal-content detail-panel" onClick={e => e.stopPropagation()}>
+            <div className="detail-header">
+              <h2>{detailMed.name} Details</h2>
+              <button className="btn-close" onClick={() => setDetailMed(null)}>&times;</button>
+            </div>
+            <div className="detail-body" style={{ textAlign: 'left', marginTop: '1.5rem' }}>
+              <p><strong>Dosage:</strong> {detailMed.dosage}</p>
+              <p><strong>Frequency:</strong> {detailMed.frequency}</p>
+              <p><strong>Standard Time:</strong> {detailMed.time}</p>
+              {detailMed.notes && (
+                <div style={{ marginTop: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem' }}>
+                  <strong>Instructions:</strong>
+                  <p style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>{detailMed.notes}</p>
+                </div>
+              )}
+              <div style={{ marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '1rem', fontSize: '0.875rem', color: '#64748b' }}>
+                <p>Start Date: {new Date(detailMed.startDate).toLocaleDateString()}</p>
+                {detailMed.endDate && <p>End Date: {new Date(detailMed.endDate).toLocaleDateString()}</p>}
+              </div>
+            </div>
+            <button
+              className="btn-details"
+              style={{ width: '100%', marginTop: '2rem' }}
+              onClick={() => setDetailMed(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default MedicationsPage;
