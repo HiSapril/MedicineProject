@@ -55,6 +55,18 @@
             <response code="204">If the health log was successfully deleted</response>
             <response code="404">If the health log is not found</response>
         </member>
+        <member name="T:HealthTrackingService.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:HealthTrackingService.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HealthTrackingService.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HealthTrackingService.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:HealthTrackingService.Models.DTOs.CreateHealthLogDto">
             <summary>
             Data Transfer Object for creating a new health log entry

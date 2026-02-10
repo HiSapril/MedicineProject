@@ -12,6 +12,8 @@ import ReportPage from "../pages/ReportPage";
 import ProfilePage from "../pages/ProfilePage";
 import HomePage from "../pages/HomePage";
 import RegisterPage from "../pages/RegisterPage";
+import SettingsPage from "../pages/SettingsPage";
+import NotificationsPage from "../pages/NotificationsPage";
 
 export default function AppRoutes() {
   return (
@@ -30,8 +32,10 @@ export default function AppRoutes() {
             <Route path="medications" element={<MedicationsPage />} />
             <Route path="health" element={<HealthPage />} />
             <Route path="reminders" element={<RemindersPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="reports" element={<ReportPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Route>
       </Routes>

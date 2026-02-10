@@ -49,6 +49,22 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Apply migrations and ensure database is created
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ReminderDbContext>();
+        context.Database.Migrate();
+    }
+    catch (System.Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Database Migration Failed for ReminderService");
+    }
+}
+
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {

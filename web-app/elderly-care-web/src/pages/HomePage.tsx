@@ -1,236 +1,206 @@
 import { useNavigate } from 'react-router-dom';
+import {
+    Heart,
+    Calendar,
+    Clock,
+    Activity,
+    Smartphone,
+    Layout,
+    ShieldCheck,
+    UserCheck,
+    ArrowRight
+} from 'lucide-react';
+import './HomePage.css';
 
 const HomePage = () => {
     const navigate = useNavigate();
 
-    const handleLogin = () => {
-        navigate('/login');
-    };
+    const handleLogin = () => navigate('/login');
+    const handleRegister = () => navigate('/register');
 
     return (
-        <div style={styles.container}>
-            {/* HERO SECTION */}
-            <section style={styles.heroSection}>
-                <h1 style={styles.heroTitle}>Elderly Care & Medicine Reminder</h1>
-                <p style={styles.heroSubtitle}>
-                    A simple system to help elderly people remember medications, appointments, and daily health tracking.
+        <div className="homepage-container">
+            {/* 1. Header / Navigation */}
+            <header className="homepage-header">
+                <div className="logo-container">
+                    <Heart fill="#3498db" stroke="#3498db" />
+                    <span>CareLink</span>
+                </div>
+                <nav className="nav-links">
+                    <a href="#hero">Home</a>
+                    <a href="#features">Features</a>
+                    <a href="#how-it-works">How It Works</a>
+                </nav>
+                <div className="auth-buttons">
+                    <button onClick={handleLogin} className="btn btn-outline">Login</button>
+                    <button onClick={handleRegister} className="btn btn-primary">Register</button>
+                </div>
+            </header>
+
+            {/* 2. Hero Section */}
+            <section id="hero" className="hero-section">
+                <div className="hero-content">
+                    <h1 className="hero-title">Smart Healthcare Management for Elderly Care</h1>
+                    <p className="hero-subtitle">
+                        Manage medications, appointments, reminders, and health records — all in one accessible system.
+                        Designed for caregivers, built for peace of mind.
+                    </p>
+                    <div className="hero-buttons">
+                        <button onClick={handleLogin} className="btn btn-primary" style={{ fontSize: '1.2rem', padding: '0.8rem 2rem' }}>
+                            Login to Dashboard
+                        </button>
+                        <button onClick={handleRegister} className="btn btn-outline" style={{ fontSize: '1.2rem', padding: '0.8rem 2rem' }}>
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+                <div className="hero-image">
+                    <div className="hero-placeholder">
+                        <Activity size={100} strokeWidth={1} />
+                        <div style={{ position: 'absolute', bottom: '20px', fontSize: '1rem', opacity: 0.7 }}>
+                            Comprehensive Dashboard
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 3. System Capabilities Overview */}
+            <section id="features" className="features-section">
+                <h2 className="section-title">Comprehensive Care Management</h2>
+                <p className="section-subtitle">Everything you need to provide the best care for your loved ones.</p>
+
+                <div className="features-grid">
+                    <div className="feature-card">
+                        <div className="feature-icon"><Clock size={48} /></div>
+                        <h3>Medication Management</h3>
+                        <p>Set precise schedules and reminders so medications are never missed.</p>
+                    </div>
+
+                    <div className="feature-card">
+                        <div className="feature-icon"><Calendar size={48} /></div>
+                        <h3>Appointment Scheduling</h3>
+                        <p>Keep track of doctor visits, check-ups, and medical consultations.</p>
+                    </div>
+
+                    <div className="feature-card">
+                        <div className="feature-icon"><Activity size={48} /></div>
+                        <h3>Health Monitoring</h3>
+                        <p>Log and track vital signs like blood pressure, heart rate, and glucose.</p>
+                    </div>
+
+                    <div className="feature-card">
+                        <div className="feature-icon"><UserCheck size={48} /></div>
+                        <h3>Caregiver Oversight</h3>
+                        <p>Full control for caregivers to manage schedules and view health reports.</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* 4. Web App vs Mobile App Explanation */}
+            <section className="app-comparison-section">
+                <div className="comparison-container">
+                    {/* Web App Card */}
+                    <div className="app-card">
+                        <div className="web-app-header app-card-header">
+                            <Layout size={64} style={{ marginBottom: '1rem' }} />
+                            <h2>Web Application</h2>
+                            <span style={{ opacity: 0.9 }}>For Caregivers & Admins</span>
+                        </div>
+                        <div className="app-card-body">
+                            <ul>
+                                <li>Full Management Dashboard</li>
+                                <li>Detailed Health Reports & Charts</li>
+                                <li>Manage Medication Schedules</li>
+                                <li>Control Appointment Calendar</li>
+                                <li>User & Profile Administration</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Mobile App Card */}
+                    <div className="app-card">
+                        <div className="mobile-app-header app-card-header">
+                            <Smartphone size={64} style={{ marginBottom: '1rem' }} />
+                            <h2>Mobile Application</h2>
+                            <span style={{ opacity: 0.9 }}>For Elderly Users</span>
+                        </div>
+                        <div className="app-card-body">
+                            <ul>
+                                <li>Simple, Large-Text Interface</li>
+                                <li>Receive Medication Reminders</li>
+                                <li>Confirm Taken Medications</li>
+                                <li>View Today's Appointments</li>
+                                <li>Voice Notifications (Future)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 5. How It Works */}
+            <section id="how-it-works" className="how-it-works-section">
+                <h2 className="section-title">How It Works</h2>
+                <div className="steps-container">
+                    <div className="step-item">
+                        <div className="step-number">1</div>
+                        <h3>Register</h3>
+                        <p>Caregiver creates an account and sets up the elderly profile.</p>
+                    </div>
+                    <div className="step-item">
+                        <div className="step-number">2</div>
+                        <h3>Manage</h3>
+                        <p>Input medications, appointments, and health logs on the Web App.</p>
+                    </div>
+                    <div className="step-item">
+                        <div className="step-number">3</div>
+                        <h3>Monitor</h3>
+                        <p>Elderly user receives alerts on Mobile. You track progress here.</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* 6. Trust Section */}
+            <section className="trust-section">
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+                    <ShieldCheck size={40} color="#27ae60" />
+                    <h2 style={{ margin: 0, color: '#2c3e50' }}>Healthcare-Grade Reliability</h2>
+                </div>
+                <p style={{ maxWidth: '700px', margin: '0 auto', color: '#7f8c8d' }}>
+                    Our system is built with data consistency and reliability in mind.
+                    We ensure that every reminder is delivered and every health log is securely stored.
                 </p>
-                <div style={styles.buttonGroup}>
-                    <button onClick={handleLogin} style={styles.primaryButton}>
-                        Get Started
-                    </button>
-                    <button onClick={handleLogin} style={styles.secondaryButton}>
-                        Login
-                    </button>
-                </div>
             </section>
 
-            {/* FEATURES SECTION */}
-            <section style={styles.section}>
-                <h2 style={styles.sectionTitle}>What We Do</h2>
-                <div style={styles.grid}>
-                    <div style={styles.card}>
-                        <h3 style={styles.cardTitle}>Medication Reminders</h3>
-                        <p style={styles.cardText}>Never miss a pill with clear, timely alerts for your daily medications.</p>
-                    </div>
-                    <div style={styles.card}>
-                        <h3 style={styles.cardTitle}>Appointment Management</h3>
-                        <p style={styles.cardText}>Keep track of doctor visits and check-ups in one simple place.</p>
-                    </div>
-                    <div style={styles.card}>
-                        <h3 style={styles.cardTitle}>Health Tracking</h3>
-                        <p style={styles.cardText}>Record and monitor vital signs like blood pressure and heart rate easily.</p>
-                    </div>
-                    <div style={styles.card}>
-                        <h3 style={styles.cardTitle}>Simple Interface</h3>
-                        <p style={styles.cardText}>Designed specifically for seniors with large text and clear buttons.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* WHO IS IT FOR SECTION */}
-            <section style={styles.altSection}>
-                <h2 style={styles.sectionTitle}>Who Is It For?</h2>
-                <div style={styles.targetList}>
-                    <div style={styles.targetItem}>
-                        <strong style={styles.targetTitle}>Elderly People</strong>
-                        <p style={styles.targetText}>Stay independent and healthy with easy tools.</p>
-                    </div>
-                    <div style={styles.targetItem}>
-                        <strong style={styles.targetTitle}>Family Members</strong>
-                        <p style={styles.targetText}>Peace of mind knowing your loved ones are on track.</p>
-                    </div>
-                    <div style={styles.targetItem}>
-                        <strong style={styles.targetTitle}>Caregivers</strong>
-                        <p style={styles.targetText}>Efficiently manage schedules and health logs.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* CALL TO ACTION */}
-            <section style={styles.ctaSection}>
-                <h2 style={styles.ctaTitle}>Start taking care of your health today</h2>
-                <button onClick={handleLogin} style={styles.ctaButton}>
-                    Login to Your Account
+            {/* Call to Action */}
+            <section className="cta-section">
+                <h2 style={{ marginBottom: '20px' }}>Ready to simplify elderly care?</h2>
+                <button onClick={handleRegister} className="btn" style={{ backgroundColor: 'white', color: '#3498db', fontSize: '1.2rem', padding: '1rem 3rem' }}>
+                    Get Started Now <ArrowRight size={20} style={{ marginLeft: '10px', verticalAlign: 'middle' }} />
                 </button>
             </section>
 
-            {/* FOOTER */}
-            <footer style={styles.footer}>
-                <p>© 2026 Elderly Care System. Simple & Secure.</p>
+            {/* Footer */}
+            <footer className="homepage-footer">
+                <div className="footer-content">
+                    <div style={{ flex: 1, minWidth: '250px' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Heart size={20} fill="#ecf0f1" /> CareLink
+                        </h3>
+                        <p>Empowering caregivers, supporting seniors.</p>
+                    </div>
+                    <div className="footer-links">
+                        <a href="#hero">Home</a>
+                        <a href="#features">Features</a>
+                        <a href="/login">Login</a>
+                        <a href="/register">Register</a>
+                    </div>
+                </div>
+                <div className="footer-bottom">
+                    <p>&copy; 2026 Elderly Care Management System. All rights reserved.</p>
+                </div>
             </footer>
         </div>
     );
-};
-
-// --- Styles (Elderly Friendly: High Contrast, Large Text) ---
-const styles: Record<string, React.CSSProperties> = {
-    container: {
-        fontFamily: 'sans-serif',
-        color: '#333',
-        backgroundColor: '#fdfdfd',
-        minHeight: '100vh',
-    },
-    heroSection: {
-        backgroundColor: '#eaf2f8',
-        padding: '80px 20px',
-        textAlign: 'center',
-        borderBottom: '1px solid #d6eaf8',
-    },
-    heroTitle: {
-        fontSize: '48px',
-        color: '#2c3e50',
-        marginBottom: '20px',
-        fontWeight: 'bold',
-    },
-    heroSubtitle: {
-        fontSize: '24px',
-        color: '#555',
-        maxWidth: '800px',
-        margin: '0 auto 40px auto',
-        lineHeight: '1.4',
-    },
-    buttonGroup: {
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '20px',
-        flexWrap: 'wrap',
-    },
-    primaryButton: {
-        padding: '20px 40px',
-        fontSize: '22px',
-        backgroundColor: '#3498db',
-        color: 'white',
-        border: 'none',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        fontWeight: 'bold',
-        transition: 'background-color 0.2s',
-    },
-    secondaryButton: {
-        padding: '20px 40px',
-        fontSize: '22px',
-        backgroundColor: 'transparent',
-        color: '#3498db',
-        border: '3px solid #3498db',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        fontWeight: 'bold',
-    },
-    section: {
-        padding: '60px 20px',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        textAlign: 'center',
-    },
-    altSection: {
-        backgroundColor: '#fffcf5', // Warm tint
-        padding: '60px 20px',
-        textAlign: 'center',
-        borderTop: '1px solid #eee',
-        borderBottom: '1px solid #eee',
-    },
-    sectionTitle: {
-        fontSize: '36px',
-        color: '#2c3e50',
-        marginBottom: '40px',
-        borderBottom: '2px solid #3498db',
-        display: 'inline-block',
-        paddingBottom: '10px',
-    },
-    grid: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: '30px',
-    },
-    card: {
-        backgroundColor: 'white',
-        border: '1px solid #ddd',
-        borderRadius: '12px',
-        padding: '30px',
-        width: '280px',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-    },
-    cardTitle: {
-        fontSize: '24px',
-        color: '#2980b9',
-        marginBottom: '10px',
-    },
-    cardText: {
-        fontSize: '18px',
-        color: '#666',
-        lineHeight: '1.4',
-    },
-    targetList: {
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '40px',
-        flexWrap: 'wrap',
-    },
-    targetItem: {
-        maxWidth: '300px',
-        textAlign: 'center',
-    },
-    targetTitle: {
-        display: 'block',
-        fontSize: '24px',
-        color: '#d35400',
-        marginBottom: '10px',
-    },
-    targetText: {
-        fontSize: '20px',
-        color: '#555',
-    },
-    ctaSection: {
-        padding: '80px 20px',
-        textAlign: 'center',
-        backgroundColor: '#2ecc71',
-        color: 'white',
-    },
-    ctaTitle: {
-        fontSize: '36px',
-        marginBottom: '30px',
-        fontWeight: 'bold',
-    },
-    ctaButton: {
-        padding: '20px 50px',
-        fontSize: '24px',
-        backgroundColor: 'white',
-        color: '#27ae60',
-        border: 'none',
-        borderRadius: '10px',
-        cursor: 'pointer',
-        fontWeight: 'bold',
-        boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-    },
-    footer: {
-        padding: '30px',
-        textAlign: 'center',
-        backgroundColor: '#34495e',
-        color: '#ecf0f1',
-        fontSize: '16px',
-    },
 };
 
 export default HomePage;

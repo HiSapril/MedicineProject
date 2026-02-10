@@ -27,7 +27,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Enable XML comments for Swagger documentation
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -36,7 +35,7 @@ builder.Services.AddSwaggerGen(options =>
     }
 });
 
-// Configure CORS for web and mobile clients
+// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClients", policy =>
@@ -49,7 +48,22 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Apply migrations
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<HealthDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "HealthTrackingService: Migration failed");
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
