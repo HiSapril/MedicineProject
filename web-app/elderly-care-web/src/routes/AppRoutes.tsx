@@ -2,18 +2,18 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout";
 import AuthGuard from "./AuthGuard";
 
-import LoginPage from "../pages/LoginPage";
-import DashboardPage from "../pages/DashboardPage";
-import AppointmentsPage from "../pages/AppointmentsPage";
-import MedicationsPage from "../pages/MedicationsPage";
-import HealthPage from "../pages/HealthPage";
-import RemindersPage from "../pages/RemindersPage";
-import ReportPage from "../pages/ReportPage";
-import ProfilePage from "../pages/ProfilePage";
-import HomePage from "../pages/HomePage";
-import RegisterPage from "../pages/RegisterPage";
-import SettingsPage from "../pages/SettingsPage";
-import NotificationsPage from "../pages/NotificationsPage";
+import { HomePage } from "../pages/home/HomePage";
+import { LoginPage } from "../pages/auth/LoginPage";
+import { RegisterPage } from "../pages/auth/RegisterPage";
+import { DashboardPage } from "../pages/dashboard/DashboardPage";
+import { AppointmentsPage } from "../pages/appointments/AppointmentsPage";
+import { MedicationsPage } from "../pages/medications/MedicationsPage";
+import { HealthPage } from "../pages/health/HealthPage";
+import { RemindersPage } from "../pages/reminders/RemindersPage";
+import { NotificationsPage } from "../pages/notifications/NotificationsPage";
+import { ReportPage } from "../pages/report/ReportPage";
+import { ProfilePage } from "../pages/profile/ProfilePage";
+import { SettingsPage } from "../pages/settings/SettingsPage";
 
 export default function AppRoutes() {
   return (

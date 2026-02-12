@@ -25,7 +25,7 @@ export const mockNotifications: Notification[] = [
     {
         id: 'notif-001',
         userId: 'user-123',
-        reminderId: 'rem-001',
+        sourceReminderId: 'rem-001',
         title: 'Reminder: Doctor Appointment',
         message: 'You have an appointment with Dr. Johnson at 9:00 AM tomorrow. Please arrive 15 minutes early for check-in.',
         status: NotificationStatus.Delivered,
@@ -42,7 +42,7 @@ export const mockNotifications: Notification[] = [
     {
         id: 'notif-002',
         userId: 'user-123',
-        reminderId: 'rem-002',
+        sourceReminderId: 'rem-002',
         title: 'Reminder: Blood Pressure Medication',
         message: 'Take your blood pressure medication (Lisinopril 10mg) at 8:00 AM.',
         status: NotificationStatus.Read,
@@ -60,7 +60,7 @@ export const mockNotifications: Notification[] = [
     {
         id: 'notif-003',
         userId: 'user-123',
-        reminderId: 'rem-003',
+        sourceReminderId: 'rem-003',
         title: 'Reminder: Daily Exercise',
         message: 'Time for your daily 15-minute walk. Remember to stay hydrated!',
         status: NotificationStatus.Acknowledged,
@@ -79,14 +79,14 @@ export const mockNotifications: Notification[] = [
     {
         id: 'notif-004',
         userId: 'user-123',
-        reminderId: 'rem-004',
+        sourceReminderId: 'rem-004',
         title: 'Reminder: Diabetes Medication',
         message: 'Take your diabetes medication (Metformin 500mg) with breakfast.',
         status: NotificationStatus.Failed,
         deliveryChannel: DeliveryChannel.MobilePush,
         recipientType: RecipientType.ElderlyUser,
         sentAt: daysAgo(1, 2),
-        errorReason: 'Device offline',
+        failureReason: 'Device offline',
         retryCount: 2,
         createdAt: daysAgo(1, 2),
         updatedAt: daysAgo(1, 2)
@@ -96,7 +96,7 @@ export const mockNotifications: Notification[] = [
     {
         id: 'notif-005',
         userId: 'user-123',
-        reminderId: 'rem-005',
+        sourceReminderId: 'rem-005',
         title: 'Reminder: Physical Therapy Session',
         message: 'Physical therapy session with Dr. Smith at 2:00 PM today.',
         status: NotificationStatus.Acknowledged,
@@ -115,7 +115,7 @@ export const mockNotifications: Notification[] = [
     {
         id: 'notif-006',
         userId: 'user-123',
-        reminderId: 'rem-006',
+        sourceReminderId: 'rem-006',
         title: 'Reminder: Lab Test Appointment',
         message: 'Fasting blood test scheduled for tomorrow at 7:00 AM. No food or drink after midnight.',
         status: NotificationStatus.Delivered,
@@ -132,7 +132,7 @@ export const mockNotifications: Notification[] = [
     {
         id: 'notif-007',
         userId: 'user-123',
-        reminderId: 'rem-007',
+        sourceReminderId: 'rem-007',
         title: 'Reminder: Heart Rate Check',
         message: 'Time to check your heart rate and blood pressure. Record the results in your health log.',
         status: NotificationStatus.Acknowledged,
@@ -151,7 +151,7 @@ export const mockNotifications: Notification[] = [
     {
         id: 'notif-008',
         userId: 'user-123',
-        reminderId: 'rem-008',
+        sourceReminderId: 'rem-008',
         title: 'Reminder: Cardiology Follow-up',
         message: 'Follow-up appointment with cardiologist Dr. Williams at 10:30 AM.',
         status: NotificationStatus.Acknowledged,
@@ -170,14 +170,14 @@ export const mockNotifications: Notification[] = [
     {
         id: 'notif-009',
         userId: 'user-123',
-        reminderId: 'rem-009',
+        sourceReminderId: 'rem-009',
         title: 'Reminder: Prescription Refill',
         message: 'Your prescription for Lisinopril is running low. Schedule a refill with your pharmacy.',
         status: NotificationStatus.Failed,
         deliveryChannel: DeliveryChannel.Email,
         recipientType: RecipientType.Caregiver,
         sentAt: daysAgo(15, 0),
-        errorReason: 'Invalid email address',
+        failureReason: 'Invalid email address',
         retryCount: 4,
         createdAt: daysAgo(15, 0),
         updatedAt: daysAgo(15, 0)
@@ -186,17 +186,11 @@ export const mockNotifications: Notification[] = [
 
 export const mockNotificationDetail: NotificationDetail = {
     ...mockNotifications[0],
-    sourceReminder: {
-        id: 'rem-001',
-        type: 1, // Appointment
-        referenceId: 'apt-001',
-        scheduledTime: daysAgo(0, 2)
-    },
+    sourceEventType: 1, // Appointment
+    sourceEventId: 'apt-001',
     sourceEvent: {
-        id: 'apt-001',
         type: 'Appointment',
-        name: 'Dr. Johnson - Cardiology',
-        date: daysAgo(-1, 0) // Tomorrow
+        name: 'Dr. Johnson - Cardiology'
     },
     deliveryAttempts: [
         {
@@ -220,17 +214,11 @@ export const mockNotificationApi = {
 
         const detail: NotificationDetail = {
             ...notification,
-            sourceReminder: {
-                id: notification.reminderId,
-                type: notification.title.includes('Appointment') ? 1 : notification.title.includes('Medication') ? 0 : 2,
-                referenceId: 'ref-' + notification.id,
-                scheduledTime: notification.sentAt
-            },
+            sourceEventType: notification.title.includes('Appointment') ? 1 : notification.title.includes('Medication') ? 0 : 2,
+            sourceEventId: 'evt-' + notification.id,
             sourceEvent: {
-                id: 'evt-' + notification.id,
                 type: notification.title.includes('Appointment') ? 'Appointment' : notification.title.includes('Medication') ? 'Medication' : 'Health',
-                name: notification.title.replace('Reminder: ', ''),
-                date: notification.sentAt
+                name: notification.title.replace('Reminder: ', '')
             },
             deliveryAttempts: [
                 {
@@ -238,7 +226,7 @@ export const mockNotificationApi = {
                     attemptedAt: notification.sentAt,
                     status: notification.status === NotificationStatus.Failed ? 'Failed' : 'Success',
                     channel: notification.deliveryChannel,
-                    errorReason: notification.errorReason
+                    errorReason: notification.failureReason
                 }
             ]
         };
@@ -294,7 +282,7 @@ export const mockNotificationApi = {
                             status: NotificationStatus.Delivered,
                             deliveredAt: new Date().toISOString(),
                             retryCount: notification.retryCount + 1,
-                            errorReason: undefined
+                            failureReason: undefined
                         }
                     });
                 } else {

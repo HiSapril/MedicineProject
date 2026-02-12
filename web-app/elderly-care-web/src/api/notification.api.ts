@@ -8,36 +8,40 @@ const notificationClient = axios.create({
     },
 });
 
-// Notification delivery status enum (matches backend)
-export enum NotificationStatus {
-    Sent = 0,
-    Delivered = 1,
-    Read = 2,
-    Acknowledged = 3,
-    Failed = 4,
-    Retrying = 5
-}
+// Notification delivery status (matches backend)
+export const NotificationStatus = {
+    Sent: 0,
+    Delivered: 1,
+    Read: 2,
+    Acknowledged: 3,
+    Failed: 4,
+    Retrying: 5
+} as const;
+export type NotificationStatus = typeof NotificationStatus[keyof typeof NotificationStatus];
 
 // Notification delivery channel
-export enum DeliveryChannel {
-    MobilePush = 0,
-    Email = 1,
-    InApp = 2,
-    SMS = 3
-}
+export const DeliveryChannel = {
+    MobilePush: 0,
+    Email: 1,
+    InApp: 2,
+    SMS: 3
+} as const;
+export type DeliveryChannel = typeof DeliveryChannel[keyof typeof DeliveryChannel];
 
 // Notification recipient type
-export enum RecipientType {
-    ElderlyUser = 0,
-    Caregiver = 1
-}
+export const RecipientType = {
+    ElderlyUser: 0,
+    Caregiver: 1
+} as const;
+export type RecipientType = typeof RecipientType[keyof typeof RecipientType];
 
 // Source event type
-export enum SourceEventType {
-    Medication = 0,
-    Appointment = 1,
-    Health = 2
-}
+export const SourceEventType = {
+    Medication: 0,
+    Appointment: 1,
+    Health: 2
+} as const;
+export type SourceEventType = typeof SourceEventType[keyof typeof SourceEventType];
 
 // Backend notification structure (matches NotificationSummaryDto)
 export interface Notification {

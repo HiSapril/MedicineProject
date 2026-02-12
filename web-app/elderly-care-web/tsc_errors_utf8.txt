@@ -1,0 +1,39 @@
+﻿src/api/notification.api.ts(12,13): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/api/notification.api.ts(22,13): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/api/notification.api.ts(30,13): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/api/notification.api.ts(36,13): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/api/notification.mock.ts(28,9): error TS2353: Object literal may only specify known properties, and 'reminderId' does not exist in type 'Notification'.
+src/api/notification.mock.ts(45,9): error TS2353: Object literal may only specify known properties, and 'reminderId' does not exist in type 'Notification'.
+src/api/notification.mock.ts(63,9): error TS2353: Object literal may only specify known properties, and 'reminderId' does not exist in type 'Notification'.
+src/api/notification.mock.ts(82,9): error TS2353: Object literal may only specify known properties, and 'reminderId' does not exist in type 'Notification'.
+src/api/notification.mock.ts(99,9): error TS2353: Object literal may only specify known properties, and 'reminderId' does not exist in type 'Notification'.
+src/api/notification.mock.ts(118,9): error TS2353: Object literal may only specify known properties, and 'reminderId' does not exist in type 'Notification'.
+src/api/notification.mock.ts(135,9): error TS2353: Object literal may only specify known properties, and 'reminderId' does not exist in type 'Notification'.
+src/api/notification.mock.ts(154,9): error TS2353: Object literal may only specify known properties, and 'reminderId' does not exist in type 'Notification'.
+src/api/notification.mock.ts(173,9): error TS2353: Object literal may only specify known properties, and 'reminderId' does not exist in type 'Notification'.
+src/api/notification.mock.ts(196,9): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type '{ name: string; type: string; }'.
+src/api/notification.mock.ts(224,34): error TS2339: Property 'reminderId' does not exist on type 'Notification'.
+src/api/notification.mock.ts(230,17): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type '{ name: string; type: string; }'.
+src/api/notification.mock.ts(241,47): error TS2339: Property 'errorReason' does not exist on type 'Notification'.
+src/components/appointment/AppointmentForm.tsx(168,17): error TS2561: Object literal may only specify known properties, but 'appointmentType' does not exist in type 'CreateAppointmentPayload'. Did you mean to write 'appointmentDate'?
+src/components/dashboard/DashboardSummaryCards.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/dashboard/DashboardTimeline.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/dashboard/PriorityAlertSection.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/health/HealthEntryForm.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/components/health/HealthEntryForm.tsx(2,27): error TS6133: 'Weight' is declared but its value is never read.
+src/components/health/HealthHistoryItem.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/health/HealthStatusCard.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/health/HealthTrendChart.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/reminder/ReminderForm.tsx(149,15): error TS6133: 'now' is declared but its value is never read.
+src/components/report/AppointmentComplianceSection.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/report/MedicationAdherenceSection.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/report/NotificationDeliverySection.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/report/ReminderPerformanceSection.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/report/ReportSummaryCards.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/report/SystemHealthSection.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/settings/NotificationSettings.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/settings/PreferenceSettings.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/settings/SecuritySettings.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/pages/DashboardPage.tsx(9,3): error TS6133: 'Clock' is declared but its value is never read.
+src/pages/HealthPage.tsx(19,10): error TS6133: 'loading' is declared but its value is never read.
+src/pages/ProfilePage.tsx(1,8): error TS6133: 'React' is declared but its value is never read.

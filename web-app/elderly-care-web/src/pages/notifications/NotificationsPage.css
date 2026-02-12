@@ -1,0 +1,169 @@
+/* ========================================
+   NOTIFICATIONS PAGE - DELIVERY AUDIT TRAIL
+   ======================================== */
+
+/* --- Container --- */
+.notifications-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* --- Header --- */
+.notifications-header {
+    margin-bottom: 32px;
+}
+
+.notifications-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 32px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+}
+
+.notifications-header p {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* --- Content Area --- */
+.notifications-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* --- Section --- */
+.notification-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.section-title.collapsible {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.section-title.collapsible:hover {
+    color: #3498db;
+}
+
+/* --- Notification List --- */
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* --- Empty State --- */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 16px 0 8px 0;
+}
+
+.empty-state p {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* --- Loading & Error --- */
+.loading-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    font-size: 18px;
+    color: #64748b;
+}
+
+.error-box {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #f5c6cb;
+    margin-bottom: 24px;
+    font-size: 16px;
+}
+
+/* --- Responsive Design --- */
+
+/* Tablet */
+@media (max-width: 1023px) {
+    .notifications-container {
+        padding: 20px;
+    }
+
+    .notifications-header h1 {
+        font-size: 28px;
+    }
+
+    .section-title {
+        font-size: 22px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .notifications-container {
+        padding: 16px;
+    }
+
+    .notifications-header h1 {
+        font-size: 24px;
+    }
+
+    .notifications-header p {
+        font-size: 14px;
+    }
+
+    .section-title {
+        font-size: 20px;
+    }
+}
+
+/* --- Accessibility --- */
+
+/* Focus Indicators */
+.section-title.collapsible:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 4px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}

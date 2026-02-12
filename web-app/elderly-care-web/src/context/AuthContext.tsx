@@ -18,6 +18,7 @@ interface LoginResponse {
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  isInitialized: boolean;
   login: (data: LoginResponse) => void;
   logout: () => void;
 }
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // 🔑 Load from localStorage khi refresh
   useEffect(() => {
@@ -41,6 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.clear();
       }
     }
+    setIsInitialized(true);
   }, []);
 
   const login = (data: LoginResponse) => {
@@ -65,7 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isInitialized, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

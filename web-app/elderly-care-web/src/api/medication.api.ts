@@ -26,21 +26,43 @@ export interface Medication {
     updatedAt?: string;
 }
 
-export interface CreateMedicationPayload {
-    name: string;
+/**
+ * BACKEND DTOs
+ * Matches MedicationService.Models.DTOs
+ */
+export interface MedicationResponseDto {
+    id: string;
+    userId: string;
+    medicationName: string;
     dosage: string;
-    time: string;
-    notes?: string;
+    frequency: string;
+    scheduledTimes: string;
+    instructions: string | null;
+    startDate: string;
+    endDate: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CreateMedicationDto {
+    userId: string;
+    medicationName: string;
+    dosage: string;
+    frequency: string;
+    scheduledTimes: string;
+    instructions?: string;
+    startDate: string;
+    endDate?: string;
 }
 
 export const medicationApi = {
-    getMedications: (): Promise<AxiosResponse<Medication[]>> =>
+    getMedications: (): Promise<AxiosResponse<MedicationResponseDto[]>> =>
         axiosClient.get("/api/medications"),
 
-    createMedication: (payload: CreateMedicationPayload): Promise<AxiosResponse<Medication>> =>
+    createMedication: (payload: CreateMedicationDto): Promise<AxiosResponse<MedicationResponseDto>> =>
         axiosClient.post("/api/medications", payload),
 
-    updateMedication: (id: string, payload: Partial<CreateMedicationPayload>): Promise<AxiosResponse<Medication>> =>
+    updateMedication: (id: string, payload: Partial<CreateMedicationDto>): Promise<AxiosResponse<MedicationResponseDto>> =>
         axiosClient.put(`/api/medications/${id}`, payload),
 
     deleteMedication: (id: string): Promise<AxiosResponse<void>> =>

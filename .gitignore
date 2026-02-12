@@ -1,0 +1,25 @@
+# Logs
+*.log
+logs/
+bin/
+obj/
+
+# Temporary / Debug files
+*_error.txt
+*_debug*.txt
+debug/
+
+# Node modules
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Editor files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.sln
+*.sw?

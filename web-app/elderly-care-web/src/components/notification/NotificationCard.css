@@ -1,0 +1,210 @@
+/* NotificationCard.css */
+
+.notification-card {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+    position: relative;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Status-based left border */
+.notification-card.status-delivered {
+    border-left: 4px solid #27ae60;
+}
+
+.notification-card.status-read {
+    border-left: 4px solid #3498db;
+}
+
+.notification-card.status-acknowledged {
+    border-left: 4px solid #3498db;
+}
+
+.notification-card.status-failed {
+    border-left: 4px solid #e74c3c;
+}
+
+.notification-card.status-retrying {
+    border-left: 4px solid #f39c12;
+}
+
+.notification-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Status Badge --- */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    min-height: 48px;
+}
+
+.status-badge.status-delivered {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge.status-read {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-badge.status-acknowledged {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-badge.status-failed {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.status-retrying {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* --- Notification Content --- */
+.notification-content {
+    margin-bottom: 16px;
+}
+
+.notification-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+    line-height: 1.6;
+}
+
+.notification-message {
+    font-size: 16px;
+    color: #2c3e50;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.view-details-link {
+    background: none;
+    border: none;
+    color: #3498db;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 0;
+    margin-top: 8px;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.view-details-link:hover {
+    color: #2980b9;
+}
+
+.view-details-link:disabled {
+    color: #95a5a6;
+    cursor: not-allowed;
+}
+
+/* --- Metadata --- */
+.notification-metadata {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.metadata-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.metadata-item svg {
+    flex-shrink: 0;
+}
+
+.metadata-item.error-reason {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.source-link {
+    color: #3498db;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.source-link:hover {
+    color: #2980b9;
+}
+
+/* --- Actions --- */
+.notification-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+}
+
+.btn-action:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-action.btn-primary {
+    background-color: #3498db;
+    color: #ffffff;
+}
+
+.btn-action.btn-primary:hover:not(:disabled) {
+    background-color: #2980b9;
+}
+
+.btn-action.btn-warning {
+    background-color: #f39c12;
+    color: #ffffff;
+}
+
+.btn-action.btn-warning:hover:not(:disabled) {
+    background-color: #e67e22;
+}
+
+@media (max-width: 767px) {
+    .notification-actions {
+        flex-direction: column;
+    }
+
+    .btn-action {
+        width: 100%;
+    }
+}

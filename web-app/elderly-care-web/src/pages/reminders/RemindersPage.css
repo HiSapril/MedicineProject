@@ -1,0 +1,236 @@
+/* ===================================
+   RemindersPage Styles
+   Time-Critical Event-Trigger Interface
+   =================================== */
+
+/* --- Container --- */
+.reminders-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* --- Header --- */
+.reminders-header {
+    margin-bottom: 32px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.reminders-header h1 {
+    font-size: 32px;
+    font-weight: bold;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.reminders-header p {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+}
+
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+/* --- Buttons --- */
+.btn-primary {
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    min-height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 12px 24px;
+    min-height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+}
+
+/* --- Error Box --- */
+.error-box {
+    background: #fee;
+    border: 1px solid #e74c3c;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    color: #e74c3c;
+    font-size: 14px;
+}
+
+/* --- Content --- */
+.reminders-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* --- Sections --- */
+.reminder-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0f172a;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title.collapsible {
+    cursor: pointer;
+    user-select: none;
+    justify-content: space-between;
+}
+
+.section-title.collapsible:hover {
+    color: #3498db;
+}
+
+.reminder-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* --- Empty State --- */
+.empty-state {
+    text-align: center;
+    padding: 64px 24px;
+    color: #64748b;
+}
+
+.empty-state svg {
+    opacity: 0.2;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin: 0 0 24px 0;
+}
+
+/* --- Loading View --- */
+.loading-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    font-size: 18px;
+    color: #64748b;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+/* Tablet */
+@media (max-width: 1023px) {
+    .reminders-container {
+        padding: 20px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .reminders-container {
+        padding: 16px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .reminders-header h1 {
+        font-size: 28px;
+    }
+
+    .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ===================================
+   ACCESSIBILITY
+   =================================== */
+
+/* Focus Indicators */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid #3498db;
+    outline-offset: 4px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+
+    .btn-primary,
+    .btn-secondary {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
