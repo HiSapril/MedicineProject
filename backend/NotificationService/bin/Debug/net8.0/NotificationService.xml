@@ -1,0 +1,445 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NotificationService</name>
+    </assembly>
+    <members>
+        <member name="T:NotificationService.Controllers.NotificationsController">
+            <summary>
+            DELIVERY DOMAIN: Notification API Controller
+            
+            CRITICAL DOMAIN RULES:
+            1. Notifications are SYSTEM-GENERATED (no POST endpoint for manual creation)
+            2. Only LIMITED state updates allowed (Read, Acknowledge, Retry)
+            3. NO editing of message content
+            4. NO deletion of notifications (audit trail)
+            
+            EXPOSED ENDPOINTS:
+            - GET /api/notifications - List notifications for current user
+            - GET /api/notifications/{id} - Get notification detail with delivery history
+            - PATCH /api/notifications/{id}/read - Mark as read (Delivered → Read)
+            - PATCH /api/notifications/{id}/acknowledge - Acknowledge (Read → Acknowledged)
+            - POST /api/notifications/{id}/retry - Retry failed delivery (Failed → Retrying)
+            </summary>
+        </member>
+        <member name="M:NotificationService.Controllers.NotificationsController.GetNotifications(System.Guid,System.Int32,System.Int32)">
+            <summary>
+            Get all notifications for a specific user
+            Supports pagination, sorted by SentAt DESC
+            </summary>
+            <param name="userId">User ID to fetch notifications for</param>
+            <param name="page">Page number (default: 1)</param>
+            <param name="pageSize">Page size (default: 50, max: 100)</param>
+            <returns>List of notification summaries</returns>
+        </member>
+        <member name="M:NotificationService.Controllers.NotificationsController.GetNotificationDetail(System.Guid)">
+            <summary>
+            Get full notification detail including delivery attempt history
+            </summary>
+            <param name="id">Notification ID</param>
+            <returns>Notification detail with delivery history</returns>
+        </member>
+        <member name="M:NotificationService.Controllers.NotificationsController.MarkAsRead(System.Guid)">
+            <summary>
+            STATE TRANSITION: Delivered → Read
+            Mark notification as read by recipient
+            Idempotent operation
+            </summary>
+            <param name="id">Notification ID</param>
+            <returns>Updated notification</returns>
+        </member>
+        <member name="M:NotificationService.Controllers.NotificationsController.Acknowledge(System.Guid)">
+            <summary>
+            STATE TRANSITION: Read → Acknowledged (TERMINAL STATE)
+            Acknowledge notification receipt
+            Idempotent operation
+            </summary>
+            <param name="id">Notification ID</param>
+            <returns>Updated notification</returns>
+        </member>
+        <member name="M:NotificationService.Controllers.NotificationsController.RetryDelivery(System.Guid)">
+            <summary>
+            STATE TRANSITION: Failed → Retrying
+            Retry failed notification delivery
+            Creates new delivery attempt record
+            </summary>
+            <param name="id">Notification ID</param>
+            <returns>Updated notification</returns>
+        </member>
+        <member name="M:NotificationService.Controllers.NotificationsController.CreateNotificationInternal(NotificationService.Models.DTOs.CreateNotificationDto)">
+            <summary>
+            INTERNAL SYSTEM ENDPOINT: Create notification from system event
+            
+            CRITICAL: NOT exposed to public/user API
+            Used ONLY by other internal services (e.g., ReminderService)
+            
+            Validation:
+            - Requires valid internal API key (TODO in future)
+            - Creates notification and initial delivery attempt
+            - Sets status to Sent
+            </summary>
+            <param name="dto">Notification creation data</param>
+            <returns>Created notification summary</returns>
+        </member>
+        <member name="T:NotificationService.Data.NotificationDbContext">
+            <summary>
+            Database context for Notification Service
+            
+            DELIVERY DOMAIN: Manages notification delivery records and audit trail
+            </summary>
+        </member>
+        <member name="T:NotificationService.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:NotificationService.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NotificationService.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NotificationService.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:NotificationService.Models.DeliveryAttempt">
+            <summary>
+            DELIVERY DOMAIN: Delivery Attempt Record
+            
+            Represents a single attempt to deliver a notification.
+            Multiple attempts may exist for a single notification (in case of retries).
+            
+            This is part of the AUDIT TRAIL and is IMMUTABLE once created.
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.DeliveryAttempt.NotificationId">
+            <summary>
+            Foreign key to parent Notification
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.DeliveryAttempt.Notification">
+            <summary>
+            Navigation property to parent Notification
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.DeliveryAttempt.AttemptNumber">
+            <summary>
+            Sequential attempt number (1, 2, 3, ...)
+            First attempt is 1, retries increment this
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.DeliveryAttempt.AttemptedAt">
+            <summary>
+            When this delivery attempt was made
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.DeliveryAttempt.Status">
+            <summary>
+            Result of this delivery attempt
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.DeliveryAttempt.Channel">
+            <summary>
+            Delivery channel used for this attempt
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.DeliveryAttempt.ErrorReason">
+            <summary>
+            Error reason if delivery failed
+            Examples: "Device offline", "Network timeout", "Invalid recipient"
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.DeliveryAttempt.CreatedAt">
+            <summary>
+            Audit timestamp: when this record was created
+            </summary>
+        </member>
+        <member name="T:NotificationService.Models.DTOs.CreateNotificationDto">
+            <summary>
+            DTO for creating a new notification
+            
+            CRITICAL: This is ONLY used by the system (Reminder Service)
+            NOT exposed to external API for manual creation
+            </summary>
+        </member>
+        <member name="T:NotificationService.Models.DTOs.NotificationDetailDto">
+            <summary>
+            DTO for notification detail response
+            Includes full delivery history
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.DTOs.NotificationDetailDto.DeliveryAttempts">
+            <summary>
+            Full delivery attempt history for audit trail
+            </summary>
+        </member>
+        <member name="T:NotificationService.Models.DTOs.DeliveryAttemptDto">
+            <summary>
+            DTO for delivery attempt record
+            </summary>
+        </member>
+        <member name="T:NotificationService.Models.DTOs.NotificationSummaryDto">
+            <summary>
+            DTO for notification list response (summary view)
+            </summary>
+        </member>
+        <member name="T:NotificationService.Models.NotificationStatus">
+            <summary>
+            DELIVERY DOMAIN: Notification Status Lifecycle
+            
+            State Transition Rules:
+            - Sent → Delivered (successful delivery)
+            - Sent → Failed (delivery failure)
+            - Delivered → Read (user opens notification)
+            - Read → Acknowledged (user confirms receipt) [TERMINAL STATE]
+            - Failed → Retrying (retry attempt initiated)
+            - Retrying → Delivered (retry successful)
+            - Retrying → Failed (retry failed)
+            
+            CRITICAL: Acknowledged is a TERMINAL STATE. No transitions allowed after this.
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.NotificationStatus.Sent">
+            <summary>
+            Notification has been sent but delivery not yet confirmed
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.NotificationStatus.Delivered">
+            <summary>
+            Notification successfully delivered to recipient device/channel
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.NotificationStatus.Read">
+            <summary>
+            Recipient has opened/viewed the notification
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.NotificationStatus.Acknowledged">
+            <summary>
+            Recipient has explicitly acknowledged the notification (TERMINAL STATE)
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.NotificationStatus.Failed">
+            <summary>
+            Delivery attempt failed
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.NotificationStatus.Retrying">
+            <summary>
+            Retry delivery in progress
+            </summary>
+        </member>
+        <member name="T:NotificationService.Models.DeliveryChannel">
+            <summary>
+            Delivery channels for notifications
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.DeliveryChannel.MobilePush">
+            <summary>
+            Mobile push notification (iOS/Android)
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.DeliveryChannel.Email">
+            <summary>
+            Email notification
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.DeliveryChannel.InApp">
+            <summary>
+            In-app notification (web/mobile app)
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.DeliveryChannel.SMS">
+            <summary>
+            SMS text message
+            </summary>
+        </member>
+        <member name="T:NotificationService.Models.RecipientType">
+            <summary>
+            Type of recipient for the notification
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.RecipientType.ElderlyUser">
+            <summary>
+            Elderly user (primary care recipient)
+            </summary>
+        </member>
+        <member name="F:NotificationService.Models.RecipientType.Caregiver">
+            <summary>
+            Caregiver (family member, professional caregiver)
+            </summary>
+        </member>
+        <member name="T:NotificationService.Models.SourceEventType">
+            <summary>
+            Source event type that triggered the reminder
+            </summary>
+        </member>
+        <member name="T:NotificationService.Models.Notification">
+            <summary>
+            DELIVERY DOMAIN: Notification Entity
+            
+            CRITICAL DOMAIN RULES:
+            1. Notifications are SYSTEM-GENERATED delivery records
+            2. Notifications are NOT editable business objects
+            3. Message content is IMMUTABLE after creation
+            4. Only state transitions are allowed (Read, Acknowledged, Retry)
+            5. Notifications are an AUDIT TRAIL of delivery attempts
+            
+            REMINDER ≠ NOTIFICATION:
+            - Reminder defines WHEN to notify (trigger logic)
+            - Notification records THAT we notified (delivery record)
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.UserId">
+            <summary>
+            User who should receive this notification
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.SourceReminderId">
+            <summary>
+            Source reminder that triggered this notification
+            IMMUTABLE: Cannot be changed after creation
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.SourceEventType">
+            <summary>
+            Type of source event (Medication, Appointment, Health)
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.SourceEventId">
+            <summary>
+            ID of the source event (appointment ID, medication ID, etc.)
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.Title">
+            <summary>
+            Notification title
+            IMMUTABLE: Cannot be edited after creation
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.Message">
+            <summary>
+            Notification message content
+            IMMUTABLE: Cannot be edited after creation
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.Status">
+            <summary>
+            Current delivery status
+            Mutable: Can transition through defined state machine
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.DeliveryChannel">
+            <summary>
+            Delivery channel used for this notification
+            IMMUTABLE: Cannot be changed after creation
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.RecipientType">
+            <summary>
+            Type of recipient (Elderly User or Caregiver)
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.SentAt">
+            <summary>
+            When the notification was sent
+            IMMUTABLE: Set once at creation
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.DeliveredAt">
+            <summary>
+            When the notification was successfully delivered
+            Set when status transitions to Delivered
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.ReadAt">
+            <summary>
+            When the notification was read by recipient
+            Set when status transitions to Read
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.AcknowledgedAt">
+            <summary>
+            When the notification was acknowledged by recipient
+            Set when status transitions to Acknowledged (terminal state)
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.FailureReason">
+            <summary>
+            Reason for delivery failure (if status = Failed)
+            Examples: "Device offline", "Invalid email", "Push token expired"
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.RetryCount">
+            <summary>
+            Number of retry attempts made
+            Incremented each time retry is initiated
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.CreatedAt">
+            <summary>
+            Audit timestamp: when record was created
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.UpdatedAt">
+            <summary>
+            Audit timestamp: when record was last updated
+            </summary>
+        </member>
+        <member name="P:NotificationService.Models.Notification.DeliveryAttempts">
+            <summary>
+            Navigation property: History of all delivery attempts
+            </summary>
+        </member>
+        <member name="T:NotificationService.Services.INotificationService">
+            <summary>
+            DELIVERY DOMAIN: Notification Service
+            
+            RESPONSIBILITIES:
+            1. Create notification delivery records (system-generated only)
+            2. Track delivery lifecycle through state transitions
+            3. Maintain delivery audit trail
+            4. Allow LIMITED state updates (Read, Acknowledge, Retry)
+            
+            PROHIBITED:
+            - Editing message content
+            - Deleting notifications
+            - Changing recipient
+            - Manual notification creation via API
+            </summary>
+        </member>
+        <member name="M:NotificationService.Services.NotificationServiceImpl.CreateNotificationAsync(NotificationService.Models.DTOs.CreateNotificationDto)">
+            <summary>
+            Create a new notification delivery record
+            SYSTEM-ONLY: Called by Reminder Service when reminder is triggered
+            </summary>
+        </member>
+        <member name="M:NotificationService.Services.NotificationServiceImpl.GetNotificationsByUserIdAsync(System.Guid,System.Int32,System.Int32)">
+            <summary>
+            Get notifications for a specific user with pagination
+            Sorted by SentAt DESC (most recent first)
+            </summary>
+        </member>
+        <member name="M:NotificationService.Services.NotificationServiceImpl.GetNotificationDetailAsync(System.Guid)">
+            <summary>
+            Get full notification detail including delivery attempt history
+            </summary>
+        </member>
+        <member name="M:NotificationService.Services.NotificationServiceImpl.MarkAsReadAsync(System.Guid)">
+            <summary>
+            STATE TRANSITION: Delivered → Read
+            Idempotent: Can be called multiple times safely
+            </summary>
+        </member>
+        <member name="M:NotificationService.Services.NotificationServiceImpl.AcknowledgeAsync(System.Guid)">
+            <summary>
+            STATE TRANSITION: Read → Acknowledged (TERMINAL STATE)
+            Idempotent: Can be called multiple times safely
+            </summary>
+        </member>
+        <member name="M:NotificationService.Services.NotificationServiceImpl.RetryDeliveryAsync(System.Guid)">
+            <summary>
+            STATE TRANSITION: Failed → Retrying
+            Creates new delivery attempt record
+            </summary>
+        </member>
+    </members>
+</doc>

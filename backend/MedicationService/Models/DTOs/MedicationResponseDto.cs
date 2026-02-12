@@ -31,10 +31,10 @@ public class MedicationResponseDto
             Frequency = medication.Frequency,
             ScheduledTimes = medication.ScheduledTimes,
             Instructions = medication.Instructions,
-            StartDate = medication.StartDate,
-            EndDate = medication.EndDate,
-            CreatedAt = medication.CreatedAt,
-            UpdatedAt = medication.UpdatedAt
+            StartDate = DateTime.SpecifyKind(medication.StartDate, DateTimeKind.Utc),
+            EndDate = medication.EndDate.HasValue ? DateTime.SpecifyKind(medication.EndDate.Value, DateTimeKind.Utc) : null,
+            CreatedAt = DateTime.SpecifyKind(medication.CreatedAt, DateTimeKind.Utc),
+            UpdatedAt = DateTime.SpecifyKind(medication.UpdatedAt, DateTimeKind.Utc)
         };
     }
 }

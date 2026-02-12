@@ -47,6 +47,16 @@
             <response code="404">If the reminder is not found</response>
             <response code="400">If the data is invalid</response>
         </member>
+        <member name="M:ReminderService.Controllers.RemindersController.Update(System.Guid,ReminderService.Models.DTOs.UpdateReminderDto)">
+            <summary>
+            Update a reminder
+            </summary>
+            <param name="id">The reminder ID</param>
+            <param name="dto">The update data</param>
+            <returns>The updated reminder</returns>
+            <response code="200">Returns the updated reminder</response>
+            <response code="404">If the reminder is not found</response>
+        </member>
         <member name="M:ReminderService.Controllers.RemindersController.Delete(System.Guid)">
             <summary>
             Delete a reminder
@@ -55,6 +65,14 @@
             <returns>No content</returns>
             <response code="204">If the reminder was successfully deleted</response>
             <response code="404">If the reminder is not found</response>
+        </member>
+        <member name="M:ReminderService.Controllers.RemindersController.Snooze(System.Guid,ReminderService.Models.DTOs.SnoozeReminderDto)">
+            <summary>
+            Snooze a reminder
+            </summary>
+            <param name="id">The reminder ID</param>
+            <param name="dto">Snooze duration in minutes</param>
+            <returns>The updated reminder</returns>
         </member>
         <member name="T:ReminderService.Migrations.InitialCreate">
             <inheritdoc />

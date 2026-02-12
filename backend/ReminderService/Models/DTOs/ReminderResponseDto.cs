@@ -25,10 +25,10 @@ public class ReminderResponseDto
             UserId = reminder.UserId,
             Type = reminder.Type.ToString(),
             ReferenceId = reminder.ReferenceId,
-            ScheduledTime = reminder.ScheduledTime,
+            ScheduledTime = DateTime.SpecifyKind(reminder.ScheduledTime, DateTimeKind.Utc),
             Status = reminder.Status.ToString(),
-            CreatedAt = reminder.CreatedAt,
-            UpdatedAt = reminder.UpdatedAt
+            CreatedAt = DateTime.SpecifyKind(reminder.CreatedAt, DateTimeKind.Utc),
+            UpdatedAt = DateTime.SpecifyKind(reminder.UpdatedAt, DateTimeKind.Utc)
         };
     }
 }

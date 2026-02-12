@@ -1,11 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using ReminderService.Data;
+using ReminderService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
+
+// Register Notification Client
+builder.Services.AddHttpClient<INotificationClient, NotificationClient>();
+
+// Register Background Service for Reminder Triggers
+builder.Services.AddHostedService<ReminderTriggerService>();
 
 // Configure Database
 builder.Services.AddDbContext<ReminderDbContext>(options =>
@@ -76,7 +83,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("AllowClients");
 app.UseAuthorization();
 app.MapControllers();

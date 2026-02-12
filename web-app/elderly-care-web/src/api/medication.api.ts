@@ -5,14 +5,25 @@ export interface Medication {
     id: string;
     userId: string;
     name: string;
-    dosage: string;
-    frequency: string;
-    time: string;
-    notes?: string;
-    startDate: string;
+    form: 'Tablet' | 'Capsule' | 'Liquid' | 'Injection' | 'Other';
+    dosage: {
+        amount: number;
+        unit: 'mg' | 'ml' | 'tablet' | 'pills';
+    };
+    frequency: {
+        type: 'Daily' | 'Weekly' | 'Interval' | 'AsNeeded';
+        timesPerDay?: number;
+        specificTimes?: string[]; // ["08:00", "20:00"]
+        daysOfWeek?: number[]; // [1, 3, 5] for Mon, Wed, Fri
+        intervalDays?: number; // Every 2 days
+    };
+    startDate: string; // ISO Date
     endDate?: string;
-    createdAt: string;
-    updatedAt: string;
+    instructions?: string;
+    status: 'Active' | 'Paused' | 'Completed';
+    linkedRemindersCount?: number;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface CreateMedicationPayload {

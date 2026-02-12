@@ -19,3 +19,4 @@ AppointmentService: http://localhost:5001
 MedicationService: http://localhost:5002
 HealthTrackingService: http://localhost:5003
 ReminderService: http://localhost:5005
+NotificationService: http://localhost:5006

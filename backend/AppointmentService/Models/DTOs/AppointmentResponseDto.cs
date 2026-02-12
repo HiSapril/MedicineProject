@@ -25,10 +25,10 @@ public class AppointmentResponseDto
             UserId = appointment.UserId,
             DoctorName = appointment.DoctorName,
             Location = appointment.Location,
-            AppointmentDate = appointment.AppointmentDate,
+            AppointmentDate = DateTime.SpecifyKind(appointment.AppointmentDate, DateTimeKind.Utc),
             Notes = appointment.Notes,
-            CreatedAt = appointment.CreatedAt,
-            UpdatedAt = appointment.UpdatedAt
+            CreatedAt = DateTime.SpecifyKind(appointment.CreatedAt, DateTimeKind.Utc),
+            UpdatedAt = DateTime.SpecifyKind(appointment.UpdatedAt, DateTimeKind.Utc)
         };
     }
 }

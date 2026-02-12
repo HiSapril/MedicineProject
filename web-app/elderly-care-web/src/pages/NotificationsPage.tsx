@@ -1,216 +1,623 @@
-import { useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import {
+    notificationApi,
+    type Notification,
+    type NotificationDetail,
+    NotificationStatus,
+    DeliveryChannel,
+    RecipientType,
+    SourceEventType
+} from '../api/notification.api';
+import { useAuth } from '../context/AuthContext';
 import {
     Bell,
-    Calendar,
-    Heart,
-    Pill,
-    Info,
+    CheckCircle2,
+    Eye,
     CheckCheck,
+    AlertCircle,
+    Clock as ClockIcon,
     ChevronDown,
     ChevronUp,
-    Clock
+    X,
+    RefreshCw,
+    Smartphone,
+    Mail,
+    MessageSquare
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import './NotificationsPage.css';
 
-// Type definitions
-type NotificationType = 'health' | 'medication' | 'appointment' | 'reminder' | 'system';
-
-interface Notification {
-    id: string;
-    type: NotificationType;
-    title: string;
-    message: string;
-    timestamp: string; // ISO string or relative time for mock
-    isRead: boolean;
-    context?: string; // Additional detailed info
-}
-
 const NotificationsPage = () => {
-    // Mock Data
-    const [notifications, setNotifications] = useState<Notification[]>([
-        {
-            id: '1',
-            type: 'health',
-            title: 'Irregular Heart Rate Detected',
-            message: 'Your heart rate was slightly higher than usual this morning.',
-            timestamp: '10 mins ago',
-            isRead: false,
-            context: 'Recorded: 95 bpm at 08:30 AM. Suggested Action: Rest and monitor again in 1 hour.'
-        },
-        {
-            id: '2',
-            type: 'medication',
-            title: 'Missed Medication: Aspirin',
-            message: 'You missed your 08:00 AM dose of Aspirin.',
-            timestamp: '1 hour ago',
-            isRead: false,
-            context: 'Please take it as soon as possible if it is not too close to your next dose.'
-        },
-        {
-            id: '3',
-            type: 'appointment',
-            title: 'Upcoming Appointment Reminder',
-            message: 'Dr. Smith (Cardiologist) tomorrow at 10:00 AM.',
-            timestamp: '2 hours ago',
-            isRead: true,
-            context: 'Location: City General Hospital, Room 302. Bring your recent lab reports.'
-        },
-        {
-            id: '4',
-            type: 'system',
-            title: 'System Maintenance Scheduled',
-            message: 'The system will undergo maintenance on Sunday at 2 AM.',
-            timestamp: 'Yesterday',
-            isRead: true,
-            context: 'Downtime is expected to last 30 minutes. Emergency alerts will still function.'
-        },
-        {
-            id: '5',
-            type: 'reminder',
-            title: 'Drink Water',
-            message: 'Time to hydrate! Drink a glass of water.',
-            timestamp: 'Yesterday',
-            isRead: true,
-            context: 'Daily Goal: 8 glasses. Current status: 3/8.'
+    // --- Auth ---
+    const { user } = useAuth();
+
+    // --- State ---
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [isPastCollapsed, setIsPastCollapsed] = useState(true);
+    const [detailModal, setDetailModal] = useState<NotificationDetail | null>(null);
+    const [loadingDetail, setLoadingDetail] = useState(false);
+    const [actioningId, setActioningId] = useState<string | null>(null);
+
+    // --- Data Fetching ---
+    useEffect(() => {
+        if (user?.id) {
+            fetchNotifications(); // Initial load
+
+            // Auto-refresh every 5 seconds
+            const intervalId = setInterval(() => {
+                fetchNotifications(true); // Silent refresh
+            }, 5000);
+
+            return () => clearInterval(intervalId);
         }
-    ]);
+    }, [user?.id]);
 
-    const [filterType, setFilterType] = useState<NotificationType | 'all'>('all');
-    const [filterStatus, setFilterStatus] = useState<'all' | 'unread' | 'read'>('all');
-    const [expandedId, setExpandedId] = useState<string | null>(null);
+    const fetchNotifications = async (isSilent = false) => {
+        if (!user?.id) return;
 
-    // Derived State
-    const filteredNotifications = notifications.filter(n => {
-        const typeMatch = filterType === 'all' || n.type === filterType;
-        const statusMatch = filterStatus === 'all' || (filterStatus === 'unread' ? !n.isRead : n.isRead);
-        return typeMatch && statusMatch;
-    });
-
-    const unreadCount = notifications.filter(n => !n.isRead).length;
-
-    // Handlers
-    const toggleExpand = (id: string) => {
-        setExpandedId(expandedId === id ? null : id);
-        // Optional: Mark as read on expand? 
-        // For now, keep it manual or separate logic based on UX preference.
-        // Let's mark as read when expanded for better UX:
-        markAsRead(id);
+        if (!isSilent) setLoading(true);
+        try {
+            const response = await notificationApi.getNotifications(user.id);
+            const sorted = response.data.sort(
+                (a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
+            );
+            setNotifications(sorted);
+            setError('');
+        } catch (err) {
+            console.error(err);
+            if (!isSilent) setError('Unable to load notifications. Please check your connection.');
+        } finally {
+            if (!isSilent) setLoading(false);
+        }
     };
 
-    const markAsRead = (id: string) => {
-        setNotifications(prev => prev.map(n =>
-            n.id === id ? { ...n, isRead: true } : n
-        ));
+    // --- Temporal Grouping ---
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const groupedNotifications = useMemo(() => {
+        const todayNotifs: Notification[] = [];
+        const yesterdayNotifs: Notification[] = [];
+        const past7DaysNotifs: Notification[] = [];
+        const olderNotifs: Notification[] = [];
+
+        notifications.forEach(notif => {
+            const sentDate = new Date(notif.sentAt);
+            const sentDay = new Date(sentDate.getFullYear(), sentDate.getMonth(), sentDate.getDate());
+
+            if (sentDay.getTime() === today.getTime()) {
+                todayNotifs.push(notif);
+            } else if (sentDay.getTime() === yesterday.getTime()) {
+                yesterdayNotifs.push(notif);
+            } else if (sentDay >= sevenDaysAgo) {
+                past7DaysNotifs.push(notif);
+            } else {
+                olderNotifs.push(notif);
+            }
+        });
+
+        return {
+            today: todayNotifs,
+            yesterday: yesterdayNotifs,
+            past7Days: past7DaysNotifs,
+            older: olderNotifs
+        };
+    }, [notifications]);
+
+    // --- Helper Functions ---
+    const getStatusBadge = (status: NotificationStatus) => {
+        switch (status) {
+            case NotificationStatus.Delivered:
+                return {
+                    icon: <CheckCircle2 size={16} />,
+                    text: 'Delivered',
+                    className: 'status-delivered'
+                };
+            case NotificationStatus.Read:
+                return {
+                    icon: <Eye size={16} />,
+                    text: 'Read',
+                    className: 'status-read'
+                };
+            case NotificationStatus.Acknowledged:
+                return {
+                    icon: <CheckCheck size={16} />,
+                    text: 'Acknowledged',
+                    className: 'status-acknowledged'
+                };
+            case NotificationStatus.Failed:
+                return {
+                    icon: <AlertCircle size={16} />,
+                    text: 'Failed',
+                    className: 'status-failed'
+                };
+            case NotificationStatus.Retrying:
+                return {
+                    icon: <ClockIcon size={16} />,
+                    text: 'Retrying',
+                    className: 'status-retrying'
+                };
+            default:
+                return {
+                    icon: <Bell size={16} />,
+                    text: 'Unknown',
+                    className: 'status-unknown'
+                };
+        }
     };
 
-    const markAllAsRead = () => {
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    const getChannelIcon = (channel: DeliveryChannel) => {
+        switch (channel) {
+            case DeliveryChannel.MobilePush:
+                return <Smartphone size={14} />;
+            case DeliveryChannel.Email:
+                return <Mail size={14} />;
+            case DeliveryChannel.SMS:
+                return <MessageSquare size={14} />;
+            case DeliveryChannel.InApp:
+                return <Bell size={14} />;
+            default:
+                return <Bell size={14} />;
+        }
     };
 
-    // Icons Mapping
-    const getIcon = (type: NotificationType) => {
+    const getChannelText = (channel: DeliveryChannel) => {
+        switch (channel) {
+            case DeliveryChannel.MobilePush:
+                return 'Mobile Push';
+            case DeliveryChannel.Email:
+                return 'Email';
+            case DeliveryChannel.SMS:
+                return 'SMS';
+            case DeliveryChannel.InApp:
+                return 'In-App';
+            default:
+                return 'Unknown';
+        }
+    };
+
+    const getRecipientText = (type: RecipientType) => {
+        return type === RecipientType.ElderlyUser ? 'Elderly User' : 'Caregiver';
+    };
+
+    const getSourceEventText = (type: SourceEventType) => {
         switch (type) {
-            case 'health': return <Heart size={20} />;
-            case 'medication': return <Pill size={20} />;
-            case 'appointment': return <Calendar size={20} />;
-            case 'reminder': return <Bell size={20} />;
-            case 'system': return <Info size={20} />;
-            default: return <Bell size={20} />;
+            case SourceEventType.Medication: return 'Medication';
+            case SourceEventType.Appointment: return 'Appointment';
+            case SourceEventType.Health: return 'Health';
+            default: return 'Unknown';
         }
     };
 
-    const getIconClass = (type: NotificationType) => {
-        return `notification-icon icon-${type}`;
+    const formatTime = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return date.toLocaleString([], {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
-    return (
-        <div className="notifications-container">
-            {/* 1. Header */}
-            <header className="notifications-header">
-                <h1 className="notifications-title">Notifications</h1>
-                <p className="notifications-subtitle">Important updates and system alerts</p>
-            </header>
+    const truncateMessage = (message: string, maxLength: number = 150) => {
+        if (message.length <= maxLength) return message;
+        return message.substring(0, maxLength) + '...';
+    };
 
-            {/* 2. Filters */}
-            <section className="notifications-filters">
-                <div className="filter-group">
-                    <button
-                        className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
-                        onClick={() => setFilterType('all')}
-                    >All</button>
-                    <button
-                        className={`filter-btn ${filterType === 'health' ? 'active' : ''}`}
-                        onClick={() => setFilterType('health')}
-                    >Health</button>
-                    <button
-                        className={`filter-btn ${filterType === 'medication' ? 'active' : ''}`}
-                        onClick={() => setFilterType('medication')}
-                    >Meds</button>
-                    <button
-                        className={`filter-btn ${filterType === 'appointment' ? 'active' : ''}`}
-                        onClick={() => setFilterType('appointment')}
-                    >Appts</button>
+    // --- Action Handlers ---
+    const handleMarkAsRead = async (notif: Notification) => {
+        if (notif.status !== NotificationStatus.Delivered) return;
+
+        setActioningId(notif.id);
+        try {
+            await notificationApi.markAsRead(notif.id);
+            setNotifications(prev =>
+                prev.map(n =>
+                    n.id === notif.id
+                        ? { ...n, status: NotificationStatus.Read, readAt: new Date().toISOString() }
+                        : n
+                )
+            );
+            toast.success('Marked as read');
+        } catch (err) {
+            toast.error('Failed to mark as read');
+            console.error(err);
+        } finally {
+            setActioningId(null);
+        }
+    };
+
+    const handleAcknowledge = async (notif: Notification) => {
+        if (notif.status !== NotificationStatus.Read) return;
+
+        setActioningId(notif.id);
+        try {
+            await notificationApi.acknowledge(notif.id);
+            setNotifications(prev =>
+                prev.map(n =>
+                    n.id === notif.id
+                        ? { ...n, status: NotificationStatus.Acknowledged, acknowledgedAt: new Date().toISOString() }
+                        : n
+                )
+            );
+            toast.success('Acknowledged');
+        } catch (err) {
+            toast.error('Failed to acknowledge');
+            console.error(err);
+        } finally {
+            setActioningId(null);
+        }
+    };
+
+    const handleRetry = async (notif: Notification) => {
+        if (notif.status !== NotificationStatus.Failed) return;
+
+        // Confirmation for multiple retries
+        if (notif.retryCount >= 3) {
+            const confirmed = window.confirm(
+                `⚠️ Retry Delivery?\n\nThis notification has already failed ${notif.retryCount} times.\nAre you sure you want to retry?`
+            );
+            if (!confirmed) return;
+        }
+
+        setActioningId(notif.id);
+        try {
+            toast.info('Retrying delivery...');
+            await notificationApi.retryDelivery(notif.id);
+            setNotifications(prev =>
+                prev.map(n =>
+                    n.id === notif.id
+                        ? { ...n, status: NotificationStatus.Retrying }
+                        : n
+                )
+            );
+            // Refresh after a delay to get updated status
+            setTimeout(() => {
+                fetchNotifications();
+            }, 2000);
+        } catch (err: any) {
+            const errorMsg = err?.response?.data?.message || 'Retry failed';
+            toast.error(`Delivery failed: ${errorMsg}`);
+            console.error(err);
+        } finally {
+            setActioningId(null);
+        }
+    };
+
+    const handleViewDetails = async (notif: Notification) => {
+        setLoadingDetail(true);
+        try {
+            const response = await notificationApi.getNotificationDetail(notif.id);
+            setDetailModal(response.data);
+        } catch (err) {
+            toast.error('Failed to load notification details');
+            console.error(err);
+        } finally {
+            setLoadingDetail(false);
+        }
+    };
+
+    // --- Render Helpers ---
+    const NotificationCard = ({ notif }: { notif: Notification }) => {
+        const statusBadge = getStatusBadge(notif.status);
+        const isActioning = actioningId === notif.id;
+
+        // Determine type string for source link
+        const sourceType = notif.title.includes('Appointment') ? 'Appointment' : notif.title.includes('Medication') ? 'Medication' : 'Health';
+
+        return (
+            <div className={`notification-card ${statusBadge.className}`}>
+                {/* Status Badge */}
+                <div className={`status-badge ${statusBadge.className}`}>
+                    {statusBadge.icon}
+                    <span>{statusBadge.text}</span>
                 </div>
 
-                <div className="filter-group">
-                    {unreadCount > 0 && (
-                        <button className="mark-read-btn" onClick={markAllAsRead}>
-                            <CheckCheck size={16} /> Mark all as read
+                {/* Content */}
+                <div className="notification-content">
+                    <h3 className="notification-title">{notif.title}</h3>
+                    <p className="notification-message">{truncateMessage(notif.message)}</p>
+                    {notif.message.length > 150 && (
+                        <button
+                            className="view-details-link"
+                            onClick={() => handleViewDetails(notif)}
+                            disabled={loadingDetail}
+                        >
+                            {loadingDetail ? 'Loading...' : 'View details'}
                         </button>
                     )}
                 </div>
-            </section>
 
-            {/* 3. Notification List */}
-            <div className="notification-list">
-                {filteredNotifications.length > 0 ? (
-                    filteredNotifications.map(notification => (
-                        <div
-                            key={notification.id}
-                            className={`notification-card ${notification.isRead ? 'read' : 'unread'}`}
-                            onClick={() => toggleExpand(notification.id)}
-                        >
-                            <div className="notification-header-row">
-                                <div className={getIconClass(notification.type)}>
-                                    {getIcon(notification.type)}
-                                </div>
-
-                                <div className="notification-summary">
-                                    <div className="notification-title">{notification.title}</div>
-                                    <div className="notification-message-preview">
-                                        {notification.message}
-                                    </div>
-                                </div>
-
-                                <div className="notification-meta">
-                                    <span className="notification-time">{notification.timestamp}</span>
-                                    {!notification.isRead && <div className="unread-dot" />}
-                                    {expandedId === notification.id ? <ChevronUp size={16} color="#95a5a6" /> : <ChevronDown size={16} color="#95a5a6" />}
-                                </div>
-                            </div>
-
-                            {/* 4. Expanded Details */}
-                            {expandedId === notification.id && (
-                                <div className="notification-details">
-                                    <div className="detail-message">
-                                        {notification.message}
-                                    </div>
-                                    {notification.context && (
-                                        <div className="detail-meta">
-                                            <p><Info size={14} /> {notification.context}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                {/* Metadata */}
+                <div className="notification-metadata">
+                    <div className="metadata-item">
+                        <ClockIcon size={14} />
+                        <span>Sent at: {formatTime(notif.sentAt)}</span>
+                    </div>
+                    <div className="metadata-item">
+                        {getChannelIcon(notif.deliveryChannel)}
+                        <span>Channel: {getChannelText(notif.deliveryChannel)}</span>
+                    </div>
+                    <div className="metadata-item">
+                        <Bell size={14} />
+                        <span>Recipient: {getRecipientText(notif.recipientType)}</span>
+                    </div>
+                    <div className="metadata-item">
+                        <span className="source-link" onClick={() => handleViewDetails(notif)}>
+                            🔗 Source: Reminder → {sourceType}
+                        </span>
+                    </div>
+                    {notif.failureReason && (
+                        <div className="metadata-item error-reason">
+                            <AlertCircle size={14} />
+                            <span>Error: {notif.failureReason}</span>
                         </div>
-                    ))
-                ) : (
+                    )}
+                </div>
+
+                {/* Actions */}
+                <div className="notification-actions">
+                    {notif.status === NotificationStatus.Delivered && (
+                        <button
+                            className="btn-action btn-primary"
+                            onClick={() => handleMarkAsRead(notif)}
+                            disabled={isActioning}
+                        >
+                            <Eye size={20} />
+                            {isActioning ? 'Marking...' : 'Mark as Read'}
+                        </button>
+                    )}
+                    {notif.status === NotificationStatus.Read && (
+                        <button
+                            className="btn-action btn-primary"
+                            onClick={() => handleAcknowledge(notif)}
+                            disabled={isActioning}
+                        >
+                            <CheckCheck size={20} />
+                            {isActioning ? 'Acknowledging...' : 'Acknowledge'}
+                        </button>
+                    )}
+                    {notif.status === NotificationStatus.Failed && (
+                        <button
+                            className="btn-action btn-warning"
+                            onClick={() => handleRetry(notif)}
+                            disabled={isActioning}
+                        >
+                            <RefreshCw size={20} />
+                            {isActioning ? 'Retrying...' : 'Retry Delivery'}
+                        </button>
+                    )}
+                    {notif.status === NotificationStatus.Retrying && (
+                        <button className="btn-action" disabled>
+                            <ClockIcon size={20} />
+                            Retrying...
+                        </button>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    const NotificationGroup = ({ title, notifications: notifs, icon }: {
+        title: string;
+        notifications: Notification[];
+        icon: React.ReactNode;
+    }) => {
+        if (notifs.length === 0) return null;
+
+        return (
+            <section className="notification-section">
+                <h2 className="section-title">
+                    {icon}
+                    {title}
+                </h2>
+                <div className="notification-list">
+                    {notifs.map(notif => (
+                        <NotificationCard key={notif.id} notif={notif} />
+                    ))}
+                </div>
+            </section>
+        );
+    };
+
+    if (loading) {
+        return (
+            <div className="notifications-container">
+                <div className="loading-view">Loading Notifications...</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="notifications-container">
+            {/* Page Header */}
+            <header className="notifications-header">
+                <div className="header-content">
+                    <div>
+                        <h1><Bell size={32} /> Notifications</h1>
+                        <p>System-delivered alerts from your reminders and care events</p>
+                    </div>
+                </div>
+            </header>
+
+            {error && <div className="error-box">{error}</div>}
+
+            <div className="notifications-content">
+                {/* Today */}
+                <NotificationGroup
+                    title="Today"
+                    notifications={groupedNotifications.today}
+                    icon={<Bell size={28} />}
+                />
+
+                {/* Yesterday */}
+                <NotificationGroup
+                    title="Yesterday"
+                    notifications={groupedNotifications.yesterday}
+                    icon={<ClockIcon size={28} />}
+                />
+
+                {/* Past 7 Days */}
+                <NotificationGroup
+                    title="Past 7 Days"
+                    notifications={groupedNotifications.past7Days}
+                    icon={<ClockIcon size={28} />}
+                />
+
+                {/* Older (Collapsible) */}
+                {groupedNotifications.older.length > 0 && (
+                    <section className="notification-section">
+                        <h2
+                            className="section-title collapsible"
+                            onClick={() => setIsPastCollapsed(!isPastCollapsed)}
+                        >
+                            <CheckCircle2 size={28} /> Older ({groupedNotifications.older.length})
+                            {isPastCollapsed ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
+                        </h2>
+                        {!isPastCollapsed && (
+                            <div className="notification-list">
+                                {groupedNotifications.older.map(notif => (
+                                    <NotificationCard key={notif.id} notif={notif} />
+                                ))}
+                            </div>
+                        )}
+                    </section>
+                )}
+
+                {/* Empty State */}
+                {notifications.length === 0 && (
                     <div className="empty-state">
-                        <Bell size={64} opacity={0.1} />
-                        <p>You're all caught up! No notifications to show.</p>
+                        <Bell size={64} style={{ opacity: 0.2 }} />
+                        <h3>No notifications yet</h3>
+                        <p>Notifications will appear here when your reminders are delivered</p>
                     </div>
                 )}
             </div>
+
+            {/* Detail Modal */}
+            {detailModal && (
+                <div className="modal-overlay" onClick={() => setDetailModal(null)}>
+                    <div className="modal-content detail-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Notification Details</h2>
+                            <button className="btn-close" onClick={() => setDetailModal(null)}>
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="modal-body">
+                            {/* Status Badge */}
+                            <div className={`status-badge ${getStatusBadge(detailModal.status).className}`}>
+                                {getStatusBadge(detailModal.status).icon}
+                                <span>{getStatusBadge(detailModal.status).text}</span>
+                            </div>
+
+                            <h3 className="detail-title">{detailModal.title}</h3>
+
+                            {/* Full Message */}
+                            <section className="detail-section">
+                                <h4>Full Message</h4>
+                                <p>{detailModal.message}</p>
+                            </section>
+
+                            {/* Delivery Information */}
+                            <section className="detail-section">
+                                <h4>Delivery Information</h4>
+                                <div className="detail-info-grid">
+                                    <div className="info-item">
+                                        <span className="info-label">Sent at:</span>
+                                        <span>{formatTime(detailModal.sentAt)}</span>
+                                    </div>
+                                    {detailModal.deliveredAt && (
+                                        <div className="info-item">
+                                            <span className="info-label">Delivered at:</span>
+                                            <span>{formatTime(detailModal.deliveredAt)}</span>
+                                        </div>
+                                    )}
+                                    {detailModal.readAt && (
+                                        <div className="info-item">
+                                            <span className="info-label">Read at:</span>
+                                            <span>{formatTime(detailModal.readAt)}</span>
+                                        </div>
+                                    )}
+                                    {detailModal.acknowledgedAt && (
+                                        <div className="info-item">
+                                            <span className="info-label">Acknowledged at:</span>
+                                            <span>{formatTime(detailModal.acknowledgedAt)}</span>
+                                        </div>
+                                    )}
+                                    <div className="info-item">
+                                        <span className="info-label">Channel:</span>
+                                        <span>{getChannelText(detailModal.deliveryChannel)}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <span className="info-label">Recipient:</span>
+                                        <span>{getRecipientText(detailModal.recipientType)}</span>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Source Event */}
+                            <section className="detail-section">
+                                <h4>Source Event</h4>
+                                <div className="detail-info-grid">
+                                    <div className="info-item">
+                                        <span className="info-label">Reminder ID:</span>
+                                        <span>{detailModal.sourceReminderId}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <span className="info-label">Event Type:</span>
+                                        <span>{getSourceEventText(detailModal.sourceEventType)}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <span className="info-label">Event ID:</span>
+                                        <span>{detailModal.sourceEventId}</span>
+                                    </div>
+                                    {detailModal.sourceEvent && (
+                                        <div className="info-item">
+                                            <span className="info-label">Event Name:</span>
+                                            <span>{detailModal.sourceEvent.name}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+
+                            {/* Delivery Attempts */}
+                            {detailModal.deliveryAttempts && detailModal.deliveryAttempts.length > 0 && (
+                                <section className="detail-section">
+                                    <h4>Delivery Attempts</h4>
+                                    <div className="delivery-attempts">
+                                        {detailModal.deliveryAttempts.map((attempt, idx) => (
+                                            <div key={idx} className={`attempt-item ${attempt.status.toLowerCase()}`}>
+                                                <span className="attempt-number">{attempt.attemptNumber}.</span>
+                                                <span className="attempt-time">{formatTime(attempt.attemptedAt)}</span>
+                                                <span className="attempt-status">{attempt.status}</span>
+                                                <span className="attempt-channel">({getChannelText(attempt.channel)})</span>
+                                                {attempt.errorReason && (
+                                                    <span className="attempt-error">- {attempt.errorReason}</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+                        </div>
+
+                        <div className="modal-footer">
+                            <button className="btn-secondary" onClick={() => setDetailModal(null)}>
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

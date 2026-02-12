@@ -86,7 +86,9 @@ public class RemindersController : ControllerBase
             UserId = dto.UserId,
             Type = dto.Type,
             ReferenceId = dto.ReferenceId,
-            ScheduledTime = dto.ScheduledTime,
+            ScheduledTime = dto.ScheduledTime.Kind == DateTimeKind.Unspecified 
+                ? DateTime.SpecifyKind(dto.ScheduledTime, DateTimeKind.Utc) 
+                : dto.ScheduledTime.ToUniversalTime(),
             Status = ReminderStatus.Pending, // New reminders start as Pending
             CreatedAt = now,
             UpdatedAt = now
@@ -108,7 +110,7 @@ public class RemindersController : ControllerBase
     /// <response code="200">Returns the updated reminder</response>
     /// <response code="404">If the reminder is not found</response>
     /// <response code="400">If the data is invalid</response>
-    [HttpPut("{id}/status")]
+    [HttpPatch("{id}/status")]
     [ProducesResponseType(typeof(ReminderResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -124,6 +126,44 @@ public class RemindersController : ControllerBase
         }
 
         reminder.Status = dto.Status;
+        reminder.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        var response = ReminderResponseDto.FromEntity(reminder);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Update a reminder
+    /// </summary>
+    /// <param name="id">The reminder ID</param>
+    /// <param name="dto">The update data</param>
+    /// <returns>The updated reminder</returns>
+    /// <response code="200">Returns the updated reminder</response>
+    /// <response code="404">If the reminder is not found</response>
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(ReminderResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ReminderResponseDto>> Update(Guid id, [FromBody] UpdateReminderDto dto)
+    {
+        _logger.LogInformation("Updating reminder {ReminderId}", id);
+
+        var reminder = await _context.Reminders.FindAsync(id);
+        if (reminder == null)
+        {
+            _logger.LogWarning("Reminder with ID {ReminderId} not found", id);
+            return NotFound(new { message = $"Reminder with ID {id} not found" });
+        }
+
+        reminder.UserId = dto.UserId;
+        reminder.Type = dto.Type;
+        reminder.ReferenceId = dto.ReferenceId;
+        reminder.ReferenceId = dto.ReferenceId;
+        reminder.ScheduledTime = dto.ScheduledTime.Kind == DateTimeKind.Unspecified 
+                ? DateTime.SpecifyKind(dto.ScheduledTime, DateTimeKind.Utc) 
+                : dto.ScheduledTime.ToUniversalTime();
+        reminder.UpdatedAt = DateTime.UtcNow;
         reminder.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -159,5 +199,34 @@ public class RemindersController : ControllerBase
         _logger.LogInformation("Reminder with ID {ReminderId} deleted successfully", id);
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// Snooze a reminder
+    /// </summary>
+    /// <param name="id">The reminder ID</param>
+    /// <param name="dto">Snooze duration in minutes</param>
+    /// <returns>The updated reminder</returns>
+    [HttpPatch("{id}/snooze")]
+    [ProducesResponseType(typeof(ReminderResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ReminderResponseDto>> Snooze(Guid id, [FromBody] SnoozeReminderDto dto)
+    {
+        _logger.LogInformation("Snoozing reminder {ReminderId} for {Minutes} minutes", id, dto.Minutes);
+
+        var reminder = await _context.Reminders.FindAsync(id);
+        if (reminder == null)
+        {
+            return NotFound(new { message = $"Reminder with ID {id} not found" });
+        }
+
+        // Update scheduled time
+        reminder.ScheduledTime = DateTime.UtcNow.AddMinutes(dto.Minutes); // AddMinutes to UtcNow is already UTC
+        reminder.Status = ReminderStatus.Pending; // Ensure it's pending so it triggers again
+        reminder.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(ReminderResponseDto.FromEntity(reminder));
     }
 }

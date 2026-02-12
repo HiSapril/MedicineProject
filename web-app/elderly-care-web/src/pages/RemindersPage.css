@@ -1,341 +1,849 @@
-/* RemindersPage.css */
+/* ===================================
+   RemindersPage Styles
+   Time-Critical Event-Trigger Interface
+   =================================== */
 
+/* --- Container --- */
 .reminders-container {
-    padding: 2rem;
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    padding: 24px;
 }
 
+/* --- Header --- */
 .reminders-header {
-    margin-bottom: 3rem;
+    margin-bottom: 32px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
 }
 
 .reminders-header h1 {
-    font-size: 2.5rem;
+    font-size: 32px;
+    font-weight: bold;
     color: #0f172a;
-    margin-bottom: 0.5rem;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .reminders-header p {
-    font-size: 1.25rem;
+    font-size: 16px;
     color: #64748b;
+    margin: 0;
 }
 
-/* Timeline Layout */
-.timeline-section {
-    margin-bottom: 3rem;
-    position: relative;
-    padding-left: 2rem;
-    border-left: 3px solid #e2e8f0;
-}
-
-.timeline-section::before {
-    content: '';
-    position: absolute;
-    left: -9px;
-    top: 0;
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    background: #cbd5e1;
-    border: 3px solid white;
-}
-
-.timeline-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #334155;
-    margin-bottom: 1.5rem;
-    margin-top: -0.5rem;
-}
-
-.reminders-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-/* Reminder Card */
-.reminder-card {
-    background: white;
-    border-radius: 1.25rem;
-    padding: 1.5rem;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 1.5rem;
-    align-items: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.reminder-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.reminder-icon-box {
-    width: 64px;
-    height: 64px;
-    background: #f1f5f9;
-    border-radius: 1rem;
+.btn-add {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: #64748b;
+    gap: 8px;
+    white-space: nowrap;
 }
 
-.reminder-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.reminder-type-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #94a3b8;
-}
-
-.reminder-time {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #1e293b;
-    line-height: 1;
-    margin: 0.25rem 0;
-}
-
-.reminder-description {
-    font-size: 1.25rem;
-    color: #475569;
-}
-
-/* Status Indicators */
-.status-indicator {
-    padding: 0.5rem 1.25rem;
-    border-radius: 2rem;
-    font-weight: 700;
-    font-size: 1rem;
-    text-align: center;
-}
-
-/* Color Coding */
-.status-upcoming {
-    border-left: 8px solid #2563eb;
-}
-
-.status-upcoming .reminder-icon-box {
-    color: #2563eb;
-    background: #dbeafe;
-}
-
-.status-upcoming .status-indicator {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.status-due-now {
-    border-left: 8px solid #ea580c;
-    background: #fffaf0;
-}
-
-.status-due-now .reminder-icon-box {
-    color: #ea580c;
-    background: #ffedd5;
-}
-
-.status-due-now .status-indicator {
-    background: #ea580c;
-    color: white;
-}
-
-.status-overdue {
-    border-left: 8px solid #f87171;
-}
-
-.status-overdue .reminder-icon-box {
-    color: #ef4444;
-    background: #fee2e2;
-}
-
-.status-overdue .status-indicator {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.status-acknowledged {
-    border-left: 8px solid #16a34a;
-    opacity: 0.8;
-}
-
-.status-acknowledged .reminder-icon-box {
-    color: #16a34a;
-    background: #dcfce7;
-}
-
-.status-acknowledged .status-indicator {
-    background: #dcfce7;
-    color: #166534;
-}
-
-/* Actions */
-.reminder-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.btn-acknowledge {
-    background: #16a34a;
+/* --- Buttons --- */
+.btn-primary {
+    background: #3498db;
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
-    font-weight: 700;
-    font-size: 1.125rem;
-    cursor: pointer;
+    border-radius: 8px;
+    padding: 12px 24px;
     min-height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
     transition: background 0.2s;
 }
 
-.btn-acknowledge:hover {
-    background: #15803d;
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 12px 24px;
+    min-height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+}
+
+.btn-action {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px 16px;
+    min-height: 48px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-action:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+}
+
+.btn-done {
+    color: #27ae60;
+    border-color: #27ae60;
+}
+
+.btn-done:hover {
+    background: #f0fdf4;
 }
 
 .btn-snooze {
-    background: white;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    min-height: 48px;
+    color: #f39c12;
+    border-color: #f39c12;
 }
 
-.btn-detail {
+.btn-snooze:hover {
+    background: #fffbeb;
+}
+
+.btn-edit {
+    color: #3498db;
+    border-color: #3498db;
+}
+
+.btn-edit:hover {
+    background: #f0f9ff;
+}
+
+.btn-close {
     background: transparent;
-    color: #64748b;
     border: none;
-    text-decoration: underline;
     cursor: pointer;
-    font-weight: 600;
-    margin-top: 0.5rem;
-    width: fit-content;
+    padding: 8px;
+    color: #64748b;
+    transition: color 0.2s;
 }
 
-/* Modals */
+.btn-close:hover {
+    color: #0f172a;
+}
+
+/* --- Error Box --- */
+.error-box {
+    background: #fee;
+    border: 1px solid #e74c3c;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    color: #e74c3c;
+    font-size: 14px;
+}
+
+/* --- Content --- */
+.reminders-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* --- Sections --- */
+.reminder-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0f172a;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title.collapsible {
+    cursor: pointer;
+    user-select: none;
+    justify-content: space-between;
+}
+
+.section-title.collapsible:hover {
+    color: #3498db;
+}
+
+/* --- Reminder List --- */
+.reminder-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* --- Reminder Card --- */
+.reminder-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: start;
+    transition: all 0.2s;
+}
+
+.reminder-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Status-based styling */
+.reminder-card.status-active {
+    border-left: 4px solid #3498db;
+}
+
+.reminder-card.status-snoozed {
+    border-left: 4px solid #f39c12;
+    background: #fffbeb;
+}
+
+.reminder-card.status-completed {
+    border-left: 4px solid #27ae60;
+    opacity: 0.7;
+}
+
+.reminder-card.status-overdue {
+    border-left: 4px solid #e74c3c;
+    background: #fef2f2;
+}
+
+.reminder-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #f0f9ff;
+    color: #3498db;
+}
+
+.status-snoozed .reminder-icon {
+    background: #fffbeb;
+    color: #f39c12;
+}
+
+.status-completed .reminder-icon {
+    background: #f0fdf4;
+    color: #27ae60;
+}
+
+.status-overdue .reminder-icon {
+    background: #fef2f2;
+    color: #e74c3c;
+}
+
+.reminder-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.reminder-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+}
+
+.reminder-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #3498db;
+    margin-bottom: 4px;
+}
+
+.reminder-time .relative-time {
+    font-weight: bold;
+}
+
+.reminder-time .absolute-time {
+    font-weight: normal;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.reminder-context {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.reminder-source {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 8px;
+}
+
+.reminder-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+}
+
+/* --- Snooze Dropdown --- */
+.snooze-wrapper {
+    position: relative;
+}
+
+.snooze-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    min-width: 150px;
+}
+
+.snooze-dropdown button {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #0f172a;
+    transition: background 0.2s;
+}
+
+.snooze-dropdown button:hover {
+    background: #f8fafc;
+}
+
+.snooze-dropdown button:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.snooze-dropdown button:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+/* --- Empty State --- */
+.empty-state {
+    text-align: center;
+    padding: 64px 24px;
+    color: #64748b;
+}
+
+.empty-state svg {
+    opacity: 0.2;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin: 0 0 24px 0;
+}
+
+/* --- Loading View --- */
+.loading-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    font-size: 18px;
+    color: #64748b;
+}
+
+/* ===================================
+   FORM MODAL STYLES
+   =================================== */
+
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.3);
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     z-index: 1000;
-    padding: 1rem;
+    padding: 24px;
+    overflow-y: auto;
 }
 
 .modal-content {
     background: white;
-    padding: 2.5rem;
-    border-radius: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.form-modal {
+    max-width: 800px;
+}
+
+.confirm-modal {
     max-width: 500px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .modal-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
+    padding: 24px 32px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
 .modal-header h2 {
-    font-size: 1.75rem;
+    font-size: 24px;
+    font-weight: bold;
     color: #0f172a;
+    margin: 0;
+}
+
+.form-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 4px 0 0 0;
 }
 
 .modal-body {
-    font-size: 1.125rem;
-    color: #475569;
-    margin-bottom: 2rem;
-    text-align: center;
+    padding: 24px 32px;
 }
 
-.modal-footer {
+.form-body {
+    padding: 32px;
     display: flex;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 32px;
 }
 
-.btn-confirm {
-    flex: 1;
-    background: #16a34a;
-    color: white;
-    border: none;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    font-weight: 700;
-    cursor: pointer;
+/* --- Form Sections --- */
+.form-section {
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 24px;
 }
 
-.btn-cancel {
-    flex: 1;
-    background: #f1f5f9;
-    color: #475569;
-    border: none;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    font-weight: 700;
-    cursor: pointer;
+.form-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
-/* Detail Modal Extra */
-.detail-item {
-    text-align: left;
-    margin-bottom: 1rem;
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 0.75rem;
+.form-section-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #0f172a;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.detail-label {
+/* --- Form Fields --- */
+.form-field {
+    margin-bottom: 20px;
+}
+
+.form-field:last-child {
+    margin-bottom: 0;
+}
+
+.form-field label {
     display: block;
-    font-size: 0.875rem;
+    font-size: 14px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.form-field input[type="text"],
+.form-field input[type="date"],
+.form-field input[type="time"],
+.form-field input[type="number"],
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    padding: 12px 16px;
+    min-height: 48px;
+    font-size: 16px;
+    color: #2c3e50;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+}
+
+.form-field input.error,
+.form-field select.error,
+.form-field textarea.error {
+    border-color: #e74c3c;
+    border-width: 2px;
+}
+
+.form-field input:disabled,
+.form-field select:disabled {
+    background: #f8fafc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.form-field textarea {
+    resize: vertical;
+    min-height: auto;
+}
+
+/* --- Radio Groups --- */
+.radio-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.radio-group.vertical {
+    flex-direction: column;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    min-height: 48px;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 16px;
+    color: #2c3e50;
+    font-weight: normal;
+}
+
+.radio-label:hover {
+    border-color: #3498db;
+    background: #f0f9ff;
+}
+
+.radio-label input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.radio-label input[type="radio"]:checked {
+    accent-color: #3498db;
+}
+
+.radio-label input[type="radio"]:checked+* {
     font-weight: 600;
-    color: #64748b;
-    margin-bottom: 0.25rem;
 }
 
-.detail-value {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #1e293b;
+.radio-label:has(input:checked) {
+    border-color: #3498db;
+    background: #f0f9ff;
 }
 
-@media (max-width: 640px) {
-    .reminder-card {
-        grid-template-columns: 1fr;
-        text-align: center;
+.radio-label:has(input:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* --- Form Row --- */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* --- Input with Unit --- */
+.input-with-unit {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+}
+
+.input-with-unit input {
+    min-width: 0;
+}
+
+.input-with-unit select {
+    min-width: 120px;
+}
+
+/* --- Helper Text --- */
+.helper-text {
+    display: block;
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 4px;
+}
+
+/* --- Error Text --- */
+.error-text {
+    display: block;
+    font-size: 14px;
+    color: #e74c3c;
+    margin-top: 4px;
+}
+
+/* --- Error Box Inline --- */
+.error-box-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fef2f2;
+    border: 1px solid #e74c3c;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+/* --- Preview Box --- */
+.preview-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0f9ff;
+    border: 1px solid #3498db;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #3498db;
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+/* --- Delivery Preview Section --- */
+.delivery-preview {
+    background: #f0f9ff;
+    border: 1px solid #3498db;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.preview-content p {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #475569;
+}
+
+.preview-content ul {
+    margin: 0;
+    padding-left: 24px;
+    font-size: 14px;
+    color: #475569;
+}
+
+.preview-content li {
+    margin-bottom: 8px;
+}
+
+/* --- Form Actions --- */
+.form-actions {
+    padding: 24px 32px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+/* Tablet */
+@media (max-width: 1023px) {
+    .reminders-container {
+        padding: 20px;
     }
 
-    .reminder-icon-box {
-        margin: 0 auto;
+    .form-body {
+        padding: 24px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .reminders-container {
+        padding: 16px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .reminders-header h1 {
+        font-size: 28px;
+    }
+
+    .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Reminder Card - Vertical Layout */
+    .reminder-card {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .reminder-icon {
+        width: 40px;
+        height: 40px;
     }
 
     .reminder-actions {
         flex-direction: row;
-        justify-content: center;
+        flex-wrap: wrap;
     }
 
-    .reminders-header h1 {
-        font-size: 2rem;
+    .reminder-actions .btn-action {
+        flex: 1;
+        min-width: 100px;
+    }
+
+    /* Form Modal */
+    .modal-overlay {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .modal-content {
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .modal-header {
+        padding: 20px 16px;
+    }
+
+    .modal-header h2 {
+        font-size: 20px;
+    }
+
+    .modal-body {
+        padding: 20px 16px;
+    }
+
+    .form-body {
+        padding: 20px 16px;
+        gap: 24px;
+    }
+
+    .form-section-title {
+        font-size: 18px;
+    }
+
+    /* Radio Groups - Vertical on Mobile */
+    .radio-group {
+        flex-direction: column;
+    }
+
+    /* Form Row - Single Column */
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    /* Form Actions - Vertical Stack */
+    .form-actions {
+        padding: 20px 16px;
+        flex-direction: column-reverse;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+
+    /* Snooze Dropdown */
+    .snooze-dropdown {
+        right: auto;
+        left: 0;
+    }
+}
+
+/* ===================================
+   ACCESSIBILITY
+   =================================== */
+
+/* Focus Indicators */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid #3498db;
+    outline-offset: 4px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .reminder-card {
+        border-width: 3px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-action {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }

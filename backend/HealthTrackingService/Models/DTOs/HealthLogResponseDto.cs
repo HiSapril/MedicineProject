@@ -24,13 +24,13 @@ public class HealthLogResponseDto
         {
             Id = healthLog.Id,
             UserId = healthLog.UserId,
-            Date = healthLog.Date,
+            Date = DateTime.SpecifyKind(healthLog.Date, DateTimeKind.Utc),
             BloodPressure = healthLog.BloodPressure,
             HeartRate = healthLog.HeartRate,
             Note = healthLog.Note,
             Weight = healthLog.Weight,
-            CreatedAt = healthLog.CreatedAt,
-            UpdatedAt = healthLog.UpdatedAt
+            CreatedAt = DateTime.SpecifyKind(healthLog.CreatedAt, DateTimeKind.Utc),
+            UpdatedAt = DateTime.SpecifyKind(healthLog.UpdatedAt, DateTimeKind.Utc)
         };
     }
 }

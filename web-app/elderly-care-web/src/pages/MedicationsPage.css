@@ -1,159 +1,229 @@
 /* MedicationsPage.css */
 
 .medications-container {
-    padding: 2rem;
-    max-width: 1000px;
+    padding: 1.5rem;
+    max-width: 1200px;
     margin: 0 auto;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: #1e293b;
+    font-family: 'Inter', sans-serif;
 }
 
+/* Header */
 .medications-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
 .medications-header h1 {
-    font-size: 2.5rem;
-    color: #0f172a;
+    font-size: 2rem;
+    color: #1e293b;
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
 }
 
 .medications-header p {
-    font-size: 1.125rem;
     color: #64748b;
+    font-size: 1.125rem;
 }
 
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #334155;
+/* Actions Bar */
+.actions-bar {
+    display: flex;
+    justify-content: flex-end;
     margin-bottom: 1.5rem;
+}
+
+.btn-add-med {
+    background-color: #2563eb;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+}
+
+.btn-add-med:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+/* Section Styling */
+.medication-group {
+    margin-bottom: 3rem;
+}
+
+.group-title {
+    font-size: 1.25rem;
+    color: #334155;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.medication-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Card Styling */
+.med-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.med-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.med-card.paused {
+    opacity: 0.7;
+    background-color: #f8fafc;
+    border-style: dashed;
+}
+
+.med-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.med-name-section {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
-/* Today's Schedule Grid */
-.schedule-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-}
-
-.medication-card {
-    background: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2sease, box-shadow 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.medication-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.medication-info h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+.med-icon {
+    background: #eff6ff;
     color: #2563eb;
-    /* Primary Blue */
+    padding: 0.75rem;
+    border-radius: 0.75rem;
 }
 
-.medication-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 1.125rem;
+.med-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.med-form {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.paused {
+    background: #f1f5f9;
     color: #475569;
 }
 
-.meta-item {
+.status-badge.completed {
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+.med-details {
+    flex-grow: 1;
+}
+
+.detail-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    color: #334155;
 }
 
-/* Status Badges */
-.status-badge {
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
+.detail-label {
     font-weight: 600;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-    width: fit-content;
+    min-width: 80px;
 }
 
-.status-upcoming {
-    background-color: #ffedd5;
-    color: #9a3412;
-    /* Orange */
+.med-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
 }
 
-.status-taken {
-    background-color: #dcfce7;
-    color: #166534;
-    /* Green */
-}
-
-.status-missed {
-    background-color: #fee2e2;
-    color: #991b1b;
-    /* Soft Red */
-}
-
-/* Action Buttons */
-.card-actions {
-    margin-top: auto;
-    display: flex;
-    gap: 1rem;
-}
-
-.btn-taken {
-    background-color: #2563eb;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
+.btn-action {
+    padding: 0.625rem;
+    border-radius: 0.5rem;
     font-weight: 600;
-    font-size: 1.125rem;
     cursor: pointer;
-    flex: 1;
-    height: 48px;
-    /* accessibility: ≥44px */
-    transition: background-color 0.2s;
-}
-
-.btn-taken:hover {
-    background-color: #1d4ed8;
-}
-
-.btn-details {
-    background-color: white;
-    color: #475569;
     border: 1px solid #e2e8f0;
-    padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    height: 48px;
-    transition: background-color 0.2s;
+    background: white;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
 }
 
-.btn-details:hover {
-    background-color: #f8fafc;
+.btn-action:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
 }
 
-/* Modal Styles */
+.btn-primary {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+}
+
+.btn-primary:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
+
+.btn-warning {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: #fed7aa;
+}
+
+.btn-warning:hover {
+    background: #ffedd5;
+}
+
+/* Modal / Form */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -170,105 +240,111 @@
 
 .modal-content {
     background: white;
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    max-width: 500px;
+    padding: 2rem;
+    border-radius: 1rem;
     width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    text-align: center;
 }
 
-.modal-content h2 {
-    margin-bottom: 1rem;
-    color: #0f172a;
+.form-full-width {
+    width: 100%;
 }
 
-.modal-content p {
-    color: #64748b;
-    margin-bottom: 2rem;
+.form-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.form-section h3 {
     font-size: 1.125rem;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    font-weight: 600;
 }
 
-.modal-actions {
+.form-row {
     display: flex;
     gap: 1rem;
+    margin-bottom: 1rem;
 }
 
-.btn-confirm {
-    background-color: #166534;
-    color: white;
-    border: none;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    font-weight: 600;
+.form-group {
     flex: 1;
-    cursor: pointer;
-    height: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.form-input,
+.form-select {
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-hint {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+}
+
+.form-error {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
 }
 
 .btn-cancel {
-    background-color: #f1f5f9;
+    background: #f1f5f9;
     color: #475569;
     border: none;
-    padding: 1rem;
-    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
     font-weight: 600;
-    flex: 1;
     cursor: pointer;
-    height: 48px;
 }
 
-/* History Section */
-.history-section {
-    background: #f8fafc;
-    border-radius: 1.5rem;
-    padding: 2rem;
-    border: 1px solid #e2e8f0;
-}
-
-.history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    background: white;
-    border-radius: 0.75rem;
-    border: 1px solid #e2e8f0;
-}
-
-.history-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.history-med-name {
-    font-weight: 700;
-    font-size: 1.125rem;
-}
-
-.history-time {
-    color: #64748b;
-    font-size: 0.875rem;
+.btn-save {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
     color: #94a3b8;
-}
-
-@media (max-width: 640px) {
-    .schedule-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .medications-header h1 {
-        font-size: 2rem;
-    }
+    background: #f8fafc;
+    border-radius: 1rem;
+    border: 2px dashed #e2e8f0;
 }
